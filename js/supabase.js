@@ -51,7 +51,7 @@ export async function getRecipes() {
   const { data, error } = await supabase
     .from("recipes")
     .select("*")
-    .order("created_at", { ascending: true });
+    .order("created_at", { ascending: false });
 
   if (error) throw error;
   return (data || []).map(mapRecipe);
