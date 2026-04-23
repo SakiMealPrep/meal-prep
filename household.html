@@ -24,14 +24,18 @@
       <article class="settings-panel">
         <div>
           <span class="material-icons settings-icon">home</span>
-          <h2>Napravi household</h2>
-          <p>Ovo ce biti zajednicki prostor za sve clanove domacinstva.</p>
+          <h2 id="householdActionTitle">Napravi household</h2>
+          <p id="householdActionText">Ovo ce biti zajednicki prostor za sve clanove domacinstva.</p>
         </div>
         <form id="householdForm">
           <label for="householdName" class="form-label">Naziv</label>
           <input id="householdName" class="form-control mb-3" placeholder="Npr. Moj household" required />
           <button class="btn btn-success w-100" type="submit">Napravi household</button>
         </form>
+        <div id="existingHouseholdActions" hidden>
+          <button id="sendInviteButton" class="btn btn-success w-100" type="button">Posalji pozivnicu</button>
+          <input id="householdInviteLink" class="form-control mt-3" readonly hidden />
+        </div>
       </article>
 
       <article class="settings-panel">

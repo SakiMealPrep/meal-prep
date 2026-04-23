@@ -98,8 +98,9 @@ async function initAccountPanel() {
       return;
     }
 
-    const members = await listHouseholdMembers(household.id);
-    householdStatus.textContent = `${household.name} • ${members.length} clan(a) • ${user.email}`;
+    const members = await listHouseholdMembers(household.id).catch(() => null);
+    const memberCount = members ? `${members.length} clan(a)` : "clanovi nisu ucitani";
+    householdStatus.textContent = `${household.name} • ${memberCount} • ${user.email}`;
     accountAction = "invite";
   } catch (error) {
     householdStatus.textContent = "Household status nije dostupan. Proveri Supabase schema.";

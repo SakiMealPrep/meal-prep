@@ -154,7 +154,10 @@ create policy "Members can create invites"
 on public.household_invites
 for insert
 to authenticated
-with check (created_by = auth.uid() and public.is_household_member(household_id));
+with check (
+  created_by = auth.uid()
+  and (public.is_household_member(household_id) or public.is_household_creator(household_id))
+);
 
 drop policy if exists "Invite token can be read by authenticated users" on public.household_invites;
 create policy "Invite token can be read by authenticated users"

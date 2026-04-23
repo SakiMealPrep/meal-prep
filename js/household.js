@@ -1,9 +1,22 @@
-import { acceptInvite, createHousehold, getCurrentHousehold, repairMyHouseholds, requireSession } from "./supabase.js";
+import {
+  acceptInvite,
+  createHousehold,
+  createHouseholdInvite,
+  getCurrentHousehold,
+  repairMyHouseholds,
+  requireSession,
+} from "./supabase.js";
 
 const householdForm = document.getElementById("householdForm");
 const joinForm = document.getElementById("joinForm");
 const inviteInput = document.getElementById("inviteToken");
+const householdActionTitle = document.getElementById("householdActionTitle");
+const householdActionText = document.getElementById("householdActionText");
+const existingHouseholdActions = document.getElementById("existingHouseholdActions");
+const sendInviteButton = document.getElementById("sendInviteButton");
+const householdInviteLink = document.getElementById("householdInviteLink");
 const params = new URLSearchParams(window.location.search);
+let currentHousehold = null;
 
 init();
 
@@ -14,13 +27,19 @@ async function init() {
   const existing = await getCurrentHousehold();
   const invite = params.get("invite");
   if (invite) inviteInput.value = invite;
-  if (existing && !invite) window.location.href = "index.html";
+  if (existing && !invite) {
+    showExistingHousehold(existing);
+    return;
+  }
 
   if (!existing && !invite) {
     const repaired = await repairMyHouseholds().catch(() => null);
     if (repaired) {
-      showToast("Postojeci household je povezan sa tvojim nalogom.", "success", 3500);
-      setTimeout(() => (window.location.href = "index.html"), 800);
+      const household = await getCurrentHousehold().catch(() => null);
+      if (household) {
+        showToast("Postojeci household je povezan sa tvojim nalogom.", "success", 3500);
+        showExistingHousehold(household);
+      }
     }
   }
 }
@@ -55,6 +74,30 @@ joinForm.addEventListener("submit", async (event) => {
     showToast(error.message || "Pozivnica nije prihvacena.", "danger", 5000);
   }
 });
+
+sendInviteButton.addEventListener("click", async () => {
+  if (!currentHousehold) return;
+
+  try {
+    const invite = await createHouseholdInvite(currentHousehold.id);
+    const basePath = window.location.pathname.replace("household.html", "");
+    const link = `${window.location.origin}${basePath}signup.html?invite=${invite.token}`;
+    householdInviteLink.hidden = false;
+    householdInviteLink.value = link;
+    await navigator.clipboard?.writeText(link);
+    showToast("Invite link je napravljen i kopiran.", "success", 5000);
+  } catch (error) {
+    showToast(error.message || "Nije moguce napraviti pozivnicu.", "danger", 5000);
+  }
+});
+
+function showExistingHousehold(household) {
+  currentHousehold = household;
+  householdActionTitle.textContent = household.name;
+  householdActionText.textContent = "Vec si vlasnik ovog household-a. Posalji pozivnicu za novog clana.";
+  householdForm.hidden = true;
+  existingHouseholdActions.hidden = false;
+}
 
 function extractToken(value) {
   const raw = value.trim();
