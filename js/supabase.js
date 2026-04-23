@@ -103,14 +103,7 @@ export async function getHouseholds() {
 
   const households = (createdHouseholds || []).map((household) => ({ ...household, role: "owner" }));
 
-  await Promise.all(
-    households.map((household) =>
-      supabase
-        .from("household_members")
-        .upsert({ household_id: household.id, user_id: user.id, role: "owner" })
-        .catch(() => null)
-    )
-  );
+  await Promise.all(households.map((household) => ensureOwnerMembership(household.id, user.id)));
 
   return households;
 }
@@ -125,6 +118,16 @@ async function getMemberHouseholds() {
   return (data || [])
     .filter((row) => row.households)
     .map((row) => ({ ...row.households, role: row.role }));
+}
+
+async function ensureOwnerMembership(householdId, userId) {
+  try {
+    await supabase
+      .from("household_members")
+      .upsert({ household_id: householdId, user_id: userId, role: "owner" });
+  } catch {
+    return null;
+  }
 }
 
 export async function getCurrentHousehold() {
