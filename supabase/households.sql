@@ -3,12 +3,12 @@ create extension if not exists pgcrypto;
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql
-as $$
+as $set_updated_at$
 begin
   new.updated_at = now();
   return new;
 end;
-$$;
+$set_updated_at$;
 
 create table if not exists public.recipes (
   id uuid primary key default gen_random_uuid(),
@@ -98,28 +98,28 @@ returns boolean
 language sql
 security definer
 set search_path = public
-as $$
+as $is_household_member$
   select exists (
     select 1
     from public.household_members hm
     where hm.household_id = target_household_id
       and hm.user_id = auth.uid()
   );
-$$;
+$is_household_member$;
 
 create or replace function public.is_household_creator(target_household_id uuid)
 returns boolean
 language sql
 security definer
 set search_path = public
-as $$
+as $is_household_creator$
   select exists (
     select 1
     from public.households h
     where h.id = target_household_id
       and h.created_by = auth.uid()
   );
-$$;
+$is_household_creator$;
 
 drop trigger if exists set_households_updated_at on public.households;
 create trigger set_households_updated_at
@@ -211,7 +211,7 @@ returns uuid
 language plpgsql
 security definer
 set search_path = public
-as $$
+as $accept_household_invite$
 declare
   target_invite public.household_invites%rowtype;
 begin
@@ -237,14 +237,14 @@ begin
 
   return target_invite.household_id;
 end;
-$$;
+$accept_household_invite$;
 
 create or replace function public.create_household_with_owner(household_name text)
 returns uuid
 language plpgsql
 security definer
 set search_path = public
-as $$
+as $create_household_with_owner$
 declare
   new_household_id uuid;
 begin
@@ -261,14 +261,14 @@ begin
 
   return new_household_id;
 end;
-$$;
+$create_household_with_owner$;
 
 create or replace function public.claim_created_household()
 returns uuid
 language plpgsql
 security definer
 set search_path = public
-as $$
+as $claim_created_household$
 declare
   target_household_id uuid;
 begin
@@ -299,14 +299,14 @@ begin
 
   return target_household_id;
 end;
-$$;
+$claim_created_household$;
 
 create or replace function public.repair_my_households()
 returns uuid
 language plpgsql
 security definer
 set search_path = public
-as $$
+as $repair_my_households$
 declare
   selected_household_id uuid;
 begin
@@ -336,7 +336,7 @@ begin
 
   return selected_household_id;
 end;
-$$;
+$repair_my_households$;
 
 drop policy if exists "Members can read inventory" on public.household_inventory;
 create policy "Members can read inventory"
