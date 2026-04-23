@@ -185,6 +185,30 @@ begin
 end;
 $$;
 
+create or replace function public.create_household_with_owner(household_name text)
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  new_household_id uuid;
+begin
+  if auth.uid() is null then
+    raise exception 'User must be authenticated';
+  end if;
+
+  insert into public.households (name, created_by)
+  values (nullif(trim(household_name), ''), auth.uid())
+  returning id into new_household_id;
+
+  insert into public.household_members (household_id, user_id, role)
+  values (new_household_id, auth.uid(), 'owner');
+
+  return new_household_id;
+end;
+$$;
+
 drop policy if exists "Members can read inventory" on public.household_inventory;
 create policy "Members can read inventory"
 on public.household_inventory

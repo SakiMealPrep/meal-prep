@@ -127,21 +127,11 @@ export async function createHousehold(name) {
   const user = await getCurrentUser();
   if (!user) throw new Error("Morate biti ulogovani.");
 
-  const { data: household, error: householdError } = await supabase
-    .from("households")
-    .insert({ name, created_by: user.id })
-    .select()
-    .single();
+  const { data: householdId, error } = await supabase.rpc("create_household_with_owner", { household_name: name });
+  if (error) throw error;
 
-  if (householdError) throw householdError;
-
-  const { error: memberError } = await supabase
-    .from("household_members")
-    .insert({ household_id: household.id, user_id: user.id, role: "owner" });
-
-  if (memberError) throw memberError;
-  localStorage.setItem("activeHouseholdId", household.id);
-  return household;
+  localStorage.setItem("activeHouseholdId", householdId);
+  return { id: householdId, name };
 }
 
 export async function getInvite(token) {
