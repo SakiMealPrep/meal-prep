@@ -82,6 +82,40 @@ export async function signOut() {
 }
 
 export async function getHouseholds() {
+  const user = await getCurrentUser();
+  if (!user) return [];
+
+  const memberHouseholds = await getMemberHouseholds();
+  if (memberHouseholds.length) return memberHouseholds;
+
+  await repairMyHouseholds().catch(() => null);
+
+  const repairedHouseholds = await getMemberHouseholds();
+  if (repairedHouseholds.length) return repairedHouseholds;
+
+  const { data: createdHouseholds, error: createdError } = await supabase
+    .from("households")
+    .select("id, name, created_at")
+    .eq("created_by", user.id)
+    .order("created_at", { ascending: false });
+
+  if (createdError) throw createdError;
+
+  const households = (createdHouseholds || []).map((household) => ({ ...household, role: "owner" }));
+
+  await Promise.all(
+    households.map((household) =>
+      supabase
+        .from("household_members")
+        .upsert({ household_id: household.id, user_id: user.id, role: "owner" })
+        .catch(() => null)
+    )
+  );
+
+  return households;
+}
+
+async function getMemberHouseholds() {
   const { data, error } = await supabase
     .from("household_members")
     .select("role, households(id, name, created_at)")

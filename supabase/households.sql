@@ -107,7 +107,7 @@ create policy "Members can read households"
 on public.households
 for select
 to authenticated
-using (public.is_household_member(id));
+using (public.is_household_member(id) or created_by = auth.uid());
 
 drop policy if exists "Users can create households" on public.households;
 create policy "Users can create households"

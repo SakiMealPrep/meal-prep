@@ -1,4 +1,4 @@
-const CACHE_NAME = "smart-meal-planner-v3.6";
+const CACHE_NAME = "smart-meal-planner-v3.7";
 const APP_SHELL = [
   "/",
   "/index.html",
