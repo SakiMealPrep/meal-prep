@@ -66,6 +66,20 @@ as $$
   );
 $$;
 
+create or replace function public.is_household_creator(target_household_id uuid)
+returns boolean
+language sql
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.households h
+    where h.id = target_household_id
+      and h.created_by = auth.uid()
+  );
+$$;
+
 drop trigger if exists set_households_updated_at on public.households;
 create trigger set_households_updated_at
 before update on public.households
@@ -115,12 +129,7 @@ to authenticated
 with check (
   user_id = auth.uid()
   and role = 'owner'
-  and exists (
-    select 1
-    from public.households h
-    where h.id = household_id
-      and h.created_by = auth.uid()
-  )
+  and public.is_household_creator(household_id)
 );
 
 drop policy if exists "Members can read invites" on public.household_invites;
