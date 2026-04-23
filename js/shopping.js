@@ -1,4 +1,11 @@
-import { getRecipes } from "./supabase.js";
+import {
+  addHouseholdInventoryItems,
+  getHouseholdInventory,
+  getMealPlan,
+  getRecipes,
+  normalizeKey,
+  requireHousehold,
+} from "./supabase.js";
 
 const container = document.getElementById("shoppingListContainer");
 const meta = document.getElementById("shoppingListMeta");
@@ -6,6 +13,7 @@ const finishShoppingButton = document.getElementById("finishShopping");
 const clearBoughtButton = document.getElementById("clearBoughtItems");
 const resetButton = document.getElementById("resetShoppingList");
 
+let context = null;
 let allRecipes = [];
 let currentItems = [];
 let currentRecipeCount = 0;
@@ -13,21 +21,28 @@ let currentUsesPlan = false;
 
 async function initShoppingList() {
   try {
+    context = await requireHousehold();
+    if (!context) return;
+
     allRecipes = await getRecipes();
-    currentItems = buildShoppingList(allRecipes);
+    currentItems = await buildShoppingList();
     renderList();
   } catch (error) {
     console.error(error);
-    container.innerHTML = `<div class="alert alert-danger">Supabase tabela recipes nije dostupna.</div>`;
+    container.innerHTML = `<div class="alert alert-danger">Household lista kupovine nije dostupna. Pokreni supabase/households.sql.</div>`;
   }
 }
 
-function buildShoppingList(recipes) {
-  const selectedIds = getPlanRecipeIds();
+async function buildShoppingList() {
+  const [plan, inventoryRows] = await Promise.all([
+    getMealPlan(context.household.id),
+    getHouseholdInventory(context.household.id),
+  ]);
+  const selectedIds = getPlanRecipeIds(plan);
   const sourceRecipes = selectedIds.length
-    ? recipes.filter((recipe) => selectedIds.includes(recipe.id))
-    : recipes;
-  const inventory = new Set(getInventory());
+    ? allRecipes.filter((recipe) => selectedIds.includes(recipe.id))
+    : allRecipes;
+  const inventory = new Set(inventoryRows.map((item) => item.ingredient_key));
   const itemsByKey = new Map();
 
   sourceRecipes.forEach((recipe) => {
@@ -41,7 +56,7 @@ function buildShoppingList(recipes) {
 
   currentRecipeCount = sourceRecipes.length;
   currentUsesPlan = selectedIds.length > 0;
-  updateMeta();
+  updateMeta(inventory.size);
   return Array.from(itemsByKey.values()).sort((a, b) => a.label.localeCompare(b.label, "sr"));
 }
 
@@ -49,7 +64,6 @@ function renderList() {
   const bought = new Set(getBoughtItems());
   const visibleItems = currentItems.filter((item) => !bought.has(item.key));
 
-  updateMeta();
   container.innerHTML = "";
 
   if (!currentItems.length) {
@@ -58,7 +72,7 @@ function renderList() {
         <span class="material-icons">check_circle</span>
         <div>
           <strong>Imas sve sto ti treba.</strong>
-          <p>Inventar pokriva sve sastojke iz trenutnog plana.</p>
+          <p>Household inventar pokriva sve sastojke iz trenutnog plana.</p>
         </div>
       </div>`;
     return;
@@ -70,7 +84,7 @@ function renderList() {
         <span class="material-icons">done_all</span>
         <div>
           <strong>Sve sa liste je oznaceno kao kupljeno.</strong>
-          <p>Osvezi listu ako zelis ponovo da je izracunas iz inventara.</p>
+          <p>Klikni Zavrsena kupovina da sve predje u household inventar.</p>
         </div>
       </div>`;
     return;
@@ -94,17 +108,16 @@ function renderList() {
   container.appendChild(ul);
 }
 
-function updateMeta() {
-  const inventoryCount = getInventory().length;
+function updateMeta(inventoryCount = null) {
   const source = currentUsesPlan ? "nedeljnog plana" : "svih recepata";
-  meta.textContent = `Lista je izracunata iz ${source}, za ${currentRecipeCount} recepta. Na stanju: ${inventoryCount} sastojaka.`;
+  const invText = inventoryCount === null ? "" : ` Na stanju: ${inventoryCount} sastojaka.`;
+  meta.textContent = `${context.household.name}: lista je izracunata iz ${source}, za ${currentRecipeCount} recepta.${invText}`;
 }
 
 function markBought(key) {
   const bought = new Set(getBoughtItems());
   bought.add(key);
   localStorage.setItem("shoppingBought", JSON.stringify(Array.from(bought)));
-  addInventoryItem(key);
   renderList();
 }
 
@@ -113,10 +126,10 @@ function clearBoughtItems() {
   currentItems = currentItems.filter((item) => !bought.has(item.key));
   localStorage.removeItem("shoppingBought");
   renderList();
-  showToast("Kupljene stavke su sklonjene.", "success");
+  showToast("Kupljene stavke su sklonjene sa trenutne liste.", "success");
 }
 
-function finishShopping() {
+async function finishShopping() {
   if (!currentItems.length) {
     showToast("Lista kupovine je vec prazna.", "info");
     return;
@@ -125,57 +138,26 @@ function finishShopping() {
   const bought = new Set(getBoughtItems());
   const remainingItems = currentItems.filter((item) => !bought.has(item.key));
   const itemsToStore = remainingItems.length ? remainingItems : currentItems;
-  addInventoryItems(itemsToStore.map((item) => item.key));
 
+  await addHouseholdInventoryItems(context.household.id, itemsToStore);
   currentItems = [];
-  localStorage.removeItem("shoppingList");
   localStorage.removeItem("shoppingBought");
   renderList();
-  showToast("Kupovina je zavrsena. Stavke su prebacene u inventar.", "success", 4000);
+  showToast("Kupovina je zavrsena. Stavke su prebacene u household inventar.", "success", 4000);
 }
 
-function resetShoppingList() {
-  localStorage.removeItem("shoppingList");
+async function resetShoppingList() {
   localStorage.removeItem("shoppingBought");
-  currentItems = buildShoppingList(allRecipes);
+  currentItems = await buildShoppingList();
   renderList();
-  showToast("Lista je osvezena iz plana i inventara.", "info");
+  showToast("Lista je osvezena iz household plana i inventara.", "info");
 }
 
-function getPlanRecipeIds() {
-  const plan = getSavedPlan();
+function getPlanRecipeIds(plan) {
   const ids = Object.values(plan)
     .flatMap((dayObj) => Object.values(dayObj))
     .filter(Boolean);
   return [...new Set(ids)];
-}
-
-function getSavedPlan() {
-  const raw = localStorage.getItem("weeklyPlan");
-  if (!raw) return {};
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return {};
-  }
-}
-
-function getInventory() {
-  try {
-    return (JSON.parse(localStorage.getItem("inventory")) || []).map(normalizeKey);
-  } catch {
-    return [];
-  }
-}
-
-function addInventoryItem(key) {
-  addInventoryItems([key]);
-}
-
-function addInventoryItems(keys) {
-  const inventory = new Set(getInventory());
-  keys.forEach((key) => inventory.add(key));
-  localStorage.setItem("inventory", JSON.stringify(Array.from(inventory).sort()));
 }
 
 function getBoughtItems() {
@@ -191,15 +173,6 @@ function normalizeIngredients(value) {
     .split(",")
     .map((item) => item.trim())
     .filter(Boolean);
-}
-
-function normalizeKey(value) {
-  return String(value || "")
-    .trim()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/đ/g, "dj");
 }
 
 function escapeHtml(value) {

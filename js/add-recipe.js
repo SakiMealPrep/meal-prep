@@ -1,8 +1,12 @@
-import { createRecipe } from "./supabase.js";
+import { createRecipe, requireHousehold } from "./supabase.js";
+
+let context = null;
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("addRecipeForm");
   if (!form) return;
+
+  init();
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -17,6 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
       protein: form.protein.value,
       carbs: form.carbs.value,
       fat: form.fat.value,
+      household_id: context?.household.id,
     };
 
     if (!data.name || !data.meal || !data.goal || !data.description || !data.ingredients) {
@@ -40,3 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
+async function init() {
+  context = await requireHousehold();
+}

@@ -1,4 +1,4 @@
-const CACHE_NAME = "smart-meal-planner-v2";
+const CACHE_NAME = "smart-meal-planner-v3.0";
 const APP_SHELL = [
   "/",
   "/index.html",
@@ -6,6 +6,9 @@ const APP_SHELL = [
   "/meal-plan.html",
   "/shopping-list.html",
   "/settings.html",
+  "/login.html",
+  "/signup.html",
+  "/household.html",
   "/about.html",
   "/add-recipe.html",
   "/edit-recipe.html",
@@ -21,6 +24,9 @@ const APP_SHELL = [
   "/js/shopping.js",
   "/js/inventory.js",
   "/js/add-recipe.js",
+  "/js/login.js",
+  "/js/signup.js",
+  "/js/household.js",
   "/assets/icons/icon-192.png",
   "/assets/icons/icon-512.png",
   "/assets/icons/icon-32.png",

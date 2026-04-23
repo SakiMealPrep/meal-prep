@@ -26,6 +26,19 @@
     <section class="settings-grid mb-3">
       <article class="settings-panel">
         <div>
+          <span class="material-icons settings-icon">group</span>
+          <h2>Household</h2>
+          <p id="householdStatus">Ucitavam nalog...</p>
+        </div>
+        <div class="d-grid gap-2">
+          <button id="inviteMember" class="btn btn-success" type="button">Pozovi u moj household</button>
+          <input id="inviteLink" class="form-control" readonly hidden />
+          <button id="logoutButton" class="btn btn-outline-secondary" type="button">Odjavi se</button>
+        </div>
+      </article>
+
+      <article class="settings-panel">
+        <div>
           <span class="material-icons settings-icon">brightness_6</span>
           <h2>Izgled</h2>
           <p>Promeni temu aplikacije za udobnije planiranje uvece ili na telefonu.</p>
@@ -88,7 +101,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="js/main.js"></script>
   <script src="js/theme.js"></script>
-  <script src="js/settings.js"></script>
+  <script type="module" src="js/settings.js"></script>
   <script src="js/pwa.js"></script>
 </body>
 </html>
