@@ -127,8 +127,18 @@ export async function createHousehold(name) {
   const user = await getCurrentUser();
   if (!user) throw new Error("Morate biti ulogovani.");
 
-  const { data: householdId, error } = await supabase.rpc("create_household_with_owner", { household_name: name });
-  if (error) throw error;
+  const householdId = crypto.randomUUID();
+  const { error: householdError } = await supabase
+    .from("households")
+    .insert({ id: householdId, name, created_by: user.id });
+
+  if (householdError) throw householdError;
+
+  const { error: memberError } = await supabase
+    .from("household_members")
+    .insert({ household_id: householdId, user_id: user.id, role: "owner" });
+
+  if (memberError) throw memberError;
 
   localStorage.setItem("activeHouseholdId", householdId);
   return { id: householdId, name };
