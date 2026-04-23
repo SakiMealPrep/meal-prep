@@ -1,4 +1,4 @@
-import { acceptInvite, createHousehold, getCurrentHousehold, requireSession } from "./supabase.js";
+import { acceptInvite, claimCreatedHousehold, createHousehold, getCurrentHousehold, requireSession } from "./supabase.js";
 
 const householdForm = document.getElementById("householdForm");
 const joinForm = document.getElementById("joinForm");
@@ -15,6 +15,14 @@ async function init() {
   const invite = params.get("invite");
   if (invite) inviteInput.value = invite;
   if (existing && !invite) window.location.href = "index.html";
+
+  if (!existing && !invite) {
+    const claimed = await claimCreatedHousehold().catch(() => null);
+    if (claimed) {
+      showToast("Postojeci household je povezan sa tvojim nalogom.", "success", 3500);
+      setTimeout(() => (window.location.href = "index.html"), 800);
+    }
+  }
 }
 
 householdForm.addEventListener("submit", async (event) => {

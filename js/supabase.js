@@ -101,6 +101,13 @@ export async function getCurrentHousehold() {
   return selected;
 }
 
+export async function claimCreatedHousehold() {
+  const { data: householdId, error } = await supabase.rpc("claim_created_household");
+  if (error) throw error;
+  if (householdId) localStorage.setItem("activeHouseholdId", householdId);
+  return householdId;
+}
+
 export async function requireSession() {
   const user = await getCurrentUser();
   if (!user) {
@@ -126,6 +133,9 @@ export async function requireHousehold() {
 export async function createHousehold(name) {
   const user = await getCurrentUser();
   if (!user) throw new Error("Morate biti ulogovani.");
+
+  const claimedHouseholdId = await claimCreatedHousehold().catch(() => null);
+  if (claimedHouseholdId) return { id: claimedHouseholdId, name };
 
   const householdId = crypto.randomUUID();
   const { error: householdError } = await supabase

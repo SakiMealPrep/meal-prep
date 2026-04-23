@@ -218,6 +218,44 @@ begin
 end;
 $$;
 
+create or replace function public.claim_created_household()
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  target_household_id uuid;
+begin
+  if auth.uid() is null then
+    raise exception 'User must be authenticated';
+  end if;
+
+  select h.id
+  into target_household_id
+  from public.households h
+  where h.created_by = auth.uid()
+    and not exists (
+      select 1
+      from public.household_members hm
+      where hm.household_id = h.id
+        and hm.user_id = auth.uid()
+    )
+  order by h.created_at desc
+  limit 1;
+
+  if target_household_id is null then
+    return null;
+  end if;
+
+  insert into public.household_members (household_id, user_id, role)
+  values (target_household_id, auth.uid(), 'owner')
+  on conflict (household_id, user_id) do nothing;
+
+  return target_household_id;
+end;
+$$;
+
 drop policy if exists "Members can read inventory" on public.household_inventory;
 create policy "Members can read inventory"
 on public.household_inventory
