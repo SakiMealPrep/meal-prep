@@ -30,10 +30,13 @@
     </header>
 
     <section class="section-card mb-3">
-      <div id="inventoryList" class="row"></div>
-      <div class="mt-3 d-flex gap-2">
-        <button class="btn btn-outline-secondary" onclick="clearInventory()">🧹 Poništi sve</button>
+      <div class="inventory-toolbar mb-3">
+        <input id="inventorySearch" class="form-control" type="search" placeholder="Pretrazi sastojke" />
+        <button id="selectAllInventory" class="btn btn-outline-primary" type="button">Oznaci sve</button>
+        <button class="btn btn-outline-secondary" type="button" onclick="clearInventory()">Ponisti sve</button>
       </div>
+      <div id="inventorySummary" class="inventory-summary mb-3"></div>
+      <div id="inventoryList" class="row"></div>
     </section>
 
     <a href="index.html" class="btn btn-outline-dark">← Nazad na početnu</a>

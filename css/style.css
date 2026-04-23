@@ -144,6 +144,93 @@ a:hover {
   min-width: 180px;
 }
 
+.inventory-toolbar,
+.shopping-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  padding: 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-muted);
+}
+
+.inventory-toolbar .form-control {
+  flex: 1 1 240px;
+}
+
+.inventory-summary,
+.shopping-meta {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.inventory-item {
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  cursor: pointer;
+  transition: border-color 0.18s ease, transform 0.18s ease, background 0.18s ease;
+}
+
+.inventory-item:hover {
+  transform: translateY(-1px);
+  border-color: rgba(5, 97, 53, 0.32);
+}
+
+.inventory-item:has(input:checked) {
+  background: #e6f4ea;
+  border-color: rgba(5, 97, 53, 0.42);
+}
+
+.shopping-list {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+}
+
+.shopping-list-item label {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+  cursor: pointer;
+}
+
+.shopping-empty {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1rem;
+  background: var(--surface-muted);
+}
+
+.shopping-empty .material-icons {
+  color: var(--primary);
+  font-size: 2rem;
+}
+
+.shopping-empty p {
+  margin: 0.15rem 0 0;
+  color: var(--text-muted);
+}
+
 .badge-goal,
 .badge-soft {
   font-size: 0.72rem;

@@ -23,7 +23,7 @@ function getInventory() {
   const raw = localStorage.getItem("inventory");
   if (!raw) return [];
   try {
-    return JSON.parse(raw);
+    return JSON.parse(raw).map(normalizeKey);
   } catch {
     return [];
   }
@@ -61,7 +61,7 @@ function renderRecipes() {
     }
     if (mustHaveAll) {
       const ingredients = normalizeIngredients(recipe.ingredients);
-      const missing = ingredients.filter((item) => !inventory.includes(normalizeName(item)));
+      const missing = ingredients.filter((item) => !inventory.includes(normalizeKey(item)));
       if (missing.length > 0) return false;
     }
     return true;
@@ -74,7 +74,7 @@ function renderRecipes() {
 
   filtered.forEach((recipe) => {
     const ingredients = normalizeIngredients(recipe.ingredients);
-    const missing = ingredients.filter((item) => !inventory.includes(normalizeName(item)));
+    const missing = ingredients.filter((item) => !inventory.includes(normalizeKey(item)));
     const invOk = missing.length === 0;
     const badgeGoal = recipe.goal || "";
     const badgeMeal = recipe.meal || "";
