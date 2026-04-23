@@ -136,12 +136,12 @@ async function finishShopping() {
   }
 
   const bought = new Set(getBoughtItems());
-  const remainingItems = currentItems.filter((item) => !bought.has(item.key));
-  const itemsToStore = remainingItems.length ? remainingItems : currentItems;
+  const boughtItems = currentItems.filter((item) => bought.has(item.key));
+  const itemsToStore = boughtItems.length ? boughtItems : currentItems;
 
   await addHouseholdInventoryItems(context.household.id, itemsToStore);
-  currentItems = [];
   localStorage.removeItem("shoppingBought");
+  currentItems = await buildShoppingList();
   renderList();
   showToast("Kupovina je zavrsena. Stavke su prebacene u household inventar.", "success", 4000);
 }

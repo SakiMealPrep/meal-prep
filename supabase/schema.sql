@@ -34,30 +34,9 @@ execute function public.set_updated_at();
 alter table public.recipes enable row level security;
 
 drop policy if exists "Allow public recipe reads" on public.recipes;
-create policy "Allow public recipe reads"
-on public.recipes
-for select
-to anon, authenticated
-using (true);
-
 drop policy if exists "Allow public recipe inserts" on public.recipes;
-create policy "Allow public recipe inserts"
-on public.recipes
-for insert
-to anon, authenticated
-with check (true);
-
 drop policy if exists "Allow public recipe updates" on public.recipes;
-create policy "Allow public recipe updates"
-on public.recipes
-for update
-to anon, authenticated
-using (true)
-with check (true);
-
 drop policy if exists "Allow public recipe deletes" on public.recipes;
-create policy "Allow public recipe deletes"
-on public.recipes
-for delete
-to anon, authenticated
-using (true);
+
+-- Recipe access policies live in supabase/households.sql.
+-- Run that file after this base schema so recipe writes stay tied to authenticated households.

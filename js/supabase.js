@@ -34,7 +34,7 @@ function mapRecipe(row) {
 }
 
 function mapRecipePayload(recipe) {
-  return {
+  const payload = {
     name: recipe.name?.trim() || "",
     meal: recipe.meal || "",
     goal: recipe.goal || "",
@@ -44,8 +44,13 @@ function mapRecipePayload(recipe) {
     protein: toNumber(recipe.protein),
     carbs: toNumber(recipe.carbs),
     fat: toNumber(recipe.fat),
-    household_id: recipe.household_id || null,
   };
+
+  if (Object.prototype.hasOwnProperty.call(recipe, "household_id")) {
+    payload.household_id = recipe.household_id || null;
+  }
+
+  return payload;
 }
 
 export function normalizeKey(value) {
@@ -122,9 +127,10 @@ async function getMemberHouseholds() {
 
 async function ensureOwnerMembership(householdId, userId) {
   try {
-    await supabase
+    const { error } = await supabase
       .from("household_members")
       .upsert({ household_id: householdId, user_id: userId, role: "owner" });
+    if (error) throw error;
   } catch {
     return null;
   }

@@ -1,4 +1,10 @@
-import { deleteRecipeById, getRecipes } from "./supabase.js";
+import {
+  deleteRecipeById,
+  getCurrentHousehold,
+  getHouseholdInventory,
+  getRecipes,
+  normalizeKey as normalizeIngredientKey,
+} from "./supabase.js";
 
 const recipeList = document.getElementById("recipeList");
 const mealFilter = document.getElementById("mealFilter") || document.getElementById("categoryFilter");
@@ -7,26 +13,40 @@ const searchInput = document.getElementById("searchInput") || document.getElemen
 const filterByInventory = document.getElementById("filterByInventory");
 
 let allRecipes = [];
+let inventoryKeys = [];
+let inventoryLoaded = false;
 
 async function fetchRecipes() {
   try {
     recipeList.innerHTML = `<div class="col-12"><div class="alert alert-info">Ucitavam recepte...</div></div>`;
     allRecipes = await getRecipes();
+    inventoryKeys = await loadInventoryKeys();
     renderRecipes();
   } catch (error) {
-    recipeList.innerHTML = `<div class="col-12"><div class="alert alert-danger">Supabase tabela recipes nije dostupna. Pokreni SQL iz supabase/schema.sql.</div></div>`;
+    recipeList.innerHTML = `<div class="col-12"><div class="alert alert-danger">Supabase tabela recipes nije dostupna. Pokreni SQL iz supabase/schema.sql pa supabase/households.sql.</div></div>`;
     console.error(error);
   }
 }
 
 function getInventory() {
+  if (inventoryLoaded) return inventoryKeys;
+
   const raw = localStorage.getItem("inventory");
   if (!raw) return [];
   try {
-    return JSON.parse(raw).map(normalizeKey);
+    return JSON.parse(raw).map(normalizeIngredientKey);
   } catch {
     return [];
   }
+}
+
+async function loadInventoryKeys() {
+  const household = await getCurrentHousehold().catch(() => null);
+  if (!household) return getInventory();
+
+  const rows = await getHouseholdInventory(household.id).catch(() => []);
+  inventoryLoaded = true;
+  return rows.map((item) => item.ingredient_key);
 }
 
 function normalizeName(name) {
@@ -61,7 +81,7 @@ function renderRecipes() {
     }
     if (mustHaveAll) {
       const ingredients = normalizeIngredients(recipe.ingredients);
-      const missing = ingredients.filter((item) => !inventory.includes(normalizeKey(item)));
+      const missing = ingredients.filter((item) => !inventory.includes(normalizeIngredientKey(item)));
       if (missing.length > 0) return false;
     }
     return true;
@@ -74,10 +94,11 @@ function renderRecipes() {
 
   filtered.forEach((recipe) => {
     const ingredients = normalizeIngredients(recipe.ingredients);
-    const missing = ingredients.filter((item) => !inventory.includes(normalizeKey(item)));
+    const missing = ingredients.filter((item) => !inventory.includes(normalizeIngredientKey(item)));
     const invOk = missing.length === 0;
     const badgeGoal = recipe.goal || "";
     const badgeMeal = recipe.meal || "";
+    const canManage = Boolean(recipe.household_id);
 
     recipeList.insertAdjacentHTML(
       "beforeend",
@@ -112,12 +133,16 @@ function renderRecipes() {
                 }
               </div>
               <div>
-                <button class="btn btn-outline-secondary btn-sm me-1" data-edit-id="${recipe.id}">
-                  <span class="material-icons" style="font-size:18px;vertical-align:middle;">edit</span>
-                </button>
-                <button class="btn btn-outline-danger btn-sm" data-delete-id="${recipe.id}" data-name="${escapeHtml(recipe.name || "")}">
-                  <span class="material-icons" style="font-size:18px;vertical-align:middle;">delete</span>
-                </button>
+                ${
+                  canManage
+                    ? `<button class="btn btn-outline-secondary btn-sm me-1" data-edit-id="${recipe.id}">
+                        <span class="material-icons" style="font-size:18px;vertical-align:middle;">edit</span>
+                      </button>
+                      <button class="btn btn-outline-danger btn-sm" data-delete-id="${recipe.id}" data-name="${escapeHtml(recipe.name || "")}">
+                        <span class="material-icons" style="font-size:18px;vertical-align:middle;">delete</span>
+                      </button>`
+                    : '<span class="badge badge-soft">Globalni</span>'
+                }
               </div>
             </div>
           </div>
