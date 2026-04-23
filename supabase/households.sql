@@ -10,6 +10,36 @@ begin
 end;
 $$;
 
+create table if not exists public.recipes (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  meal text not null check (meal in ('dorucak', 'rucak', 'vecera')),
+  goal text not null check (goal in ('gubitak', 'odrzavanje')),
+  description text not null default '',
+  ingredients text[] not null default '{}',
+  calories integer,
+  protein integer,
+  carbs integer,
+  fat integer,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.recipes
+add column if not exists household_id uuid;
+
+alter table public.recipes
+add column if not exists created_by uuid references auth.users(id) on delete set null;
+
+alter table public.recipes
+add column if not exists updated_at timestamptz not null default now();
+
+drop trigger if exists set_recipes_updated_at on public.recipes;
+create trigger set_recipes_updated_at
+before update on public.recipes
+for each row
+execute function public.set_updated_at();
+
 create table if not exists public.households (
   id uuid primary key default gen_random_uuid(),
   name text not null,
@@ -57,10 +87,11 @@ create table if not exists public.meal_plan_items (
 );
 
 alter table public.recipes
-add column if not exists household_id uuid references public.households(id) on delete cascade;
+drop constraint if exists recipes_household_id_fkey;
 
 alter table public.recipes
-add column if not exists created_by uuid references auth.users(id) on delete set null;
+add constraint recipes_household_id_fkey
+foreign key (household_id) references public.households(id) on delete cascade;
 
 create or replace function public.is_household_member(target_household_id uuid)
 returns boolean
@@ -101,6 +132,7 @@ alter table public.household_members enable row level security;
 alter table public.household_invites enable row level security;
 alter table public.household_inventory enable row level security;
 alter table public.meal_plan_items enable row level security;
+alter table public.recipes enable row level security;
 
 drop policy if exists "Members can read households" on public.households;
 create policy "Members can read households"
