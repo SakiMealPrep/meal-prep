@@ -257,10 +257,30 @@ export async function acceptInvite(token) {
   if (!invite || invite.used_at) throw new Error("Pozivnica nije dostupna.");
 
   const { data: householdId, error } = await supabase.rpc("accept_household_invite", { invite_token: token });
-  if (error) throw error;
+  if (error) {
+    if (!isMissingRpc(error)) throw error;
+    await acceptInviteDirectly(invite, user.id);
+  }
 
   localStorage.setItem("activeHouseholdId", householdId || invite.household_id);
   return invite;
+}
+
+async function acceptInviteDirectly(invite, userId) {
+  const { error: memberError } = await supabase
+    .from("household_members")
+    .insert({ household_id: invite.household_id, user_id: userId, role: "member" });
+
+  if (memberError && memberError.code !== "23505") throw memberError;
+
+  try {
+    await supabase
+      .from("household_invites")
+      .update({ used_by: userId, used_at: new Date().toISOString() })
+      .eq("id", invite.id);
+  } catch {
+    // Joining the household is the critical part; marking a token used can be retried later.
+  }
 }
 
 export async function listHouseholdMembers(householdId) {
