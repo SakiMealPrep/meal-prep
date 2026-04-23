@@ -1,4 +1,4 @@
-import { acceptInvite, claimCreatedHousehold, createHousehold, getCurrentHousehold, requireSession } from "./supabase.js";
+import { acceptInvite, createHousehold, getCurrentHousehold, repairMyHouseholds, requireSession } from "./supabase.js";
 
 const householdForm = document.getElementById("householdForm");
 const joinForm = document.getElementById("joinForm");
@@ -17,8 +17,8 @@ async function init() {
   if (existing && !invite) window.location.href = "index.html";
 
   if (!existing && !invite) {
-    const claimed = await claimCreatedHousehold().catch(() => null);
-    if (claimed) {
+    const repaired = await repairMyHouseholds().catch(() => null);
+    if (repaired) {
       showToast("Postojeci household je povezan sa tvojim nalogom.", "success", 3500);
       setTimeout(() => (window.location.href = "index.html"), 800);
     }

@@ -1,5 +1,15 @@
 create extension if not exists pgcrypto;
 
+create or replace function public.set_updated_at()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
 create table if not exists public.households (
   id uuid primary key default gen_random_uuid(),
   name text not null,
@@ -256,6 +266,43 @@ begin
 end;
 $$;
 
+create or replace function public.repair_my_households()
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  selected_household_id uuid;
+begin
+  if auth.uid() is null then
+    raise exception 'User must be authenticated';
+  end if;
+
+  insert into public.household_members (household_id, user_id, role)
+  select h.id, auth.uid(), 'owner'
+  from public.households h
+  where h.created_by = auth.uid()
+    and not exists (
+      select 1
+      from public.household_members hm
+      where hm.household_id = h.id
+        and hm.user_id = auth.uid()
+    )
+  on conflict (household_id, user_id) do nothing;
+
+  select h.id
+  into selected_household_id
+  from public.households h
+  join public.household_members hm on hm.household_id = h.id
+  where hm.user_id = auth.uid()
+  order by h.created_at desc
+  limit 1;
+
+  return selected_household_id;
+end;
+$$;
+
 drop policy if exists "Members can read inventory" on public.household_inventory;
 create policy "Members can read inventory"
 on public.household_inventory
@@ -320,3 +367,12 @@ on public.recipes
 for delete
 to authenticated
 using (household_id is not null and public.is_household_member(household_id));
+
+grant execute on function public.is_household_member(uuid) to authenticated;
+grant execute on function public.is_household_creator(uuid) to authenticated;
+grant execute on function public.accept_household_invite(text) to authenticated;
+grant execute on function public.create_household_with_owner(text) to authenticated;
+grant execute on function public.claim_created_household() to authenticated;
+grant execute on function public.repair_my_households() to authenticated;
+
+notify pgrst, 'reload schema';

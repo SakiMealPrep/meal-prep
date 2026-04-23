@@ -101,8 +101,19 @@ export async function getCurrentHousehold() {
   return selected;
 }
 
+function isMissingRpc(error) {
+  return error?.code === "PGRST202" || error?.status === 404 || String(error?.message || "").includes("schema cache");
+}
+
 export async function claimCreatedHousehold() {
   const { data: householdId, error } = await supabase.rpc("claim_created_household");
+  if (error) throw error;
+  if (householdId) localStorage.setItem("activeHouseholdId", householdId);
+  return householdId;
+}
+
+export async function repairMyHouseholds() {
+  const { data: householdId, error } = await supabase.rpc("repair_my_households");
   if (error) throw error;
   if (householdId) localStorage.setItem("activeHouseholdId", householdId);
   return householdId;
@@ -134,8 +145,19 @@ export async function createHousehold(name) {
   const user = await getCurrentUser();
   if (!user) throw new Error("Morate biti ulogovani.");
 
-  const claimedHouseholdId = await claimCreatedHousehold().catch(() => null);
-  if (claimedHouseholdId) return { id: claimedHouseholdId, name };
+  const repairedHouseholdId = await repairMyHouseholds().catch(() => null);
+  if (repairedHouseholdId) return { id: repairedHouseholdId, name };
+
+  const { data: rpcHouseholdId, error: rpcError } = await supabase.rpc("create_household_with_owner", {
+    household_name: name,
+  });
+
+  if (!rpcError && rpcHouseholdId) {
+    localStorage.setItem("activeHouseholdId", rpcHouseholdId);
+    return { id: rpcHouseholdId, name };
+  }
+
+  if (rpcError && !isMissingRpc(rpcError)) throw rpcError;
 
   const householdId = crypto.randomUUID();
   const { error: householdError } = await supabase
@@ -148,7 +170,11 @@ export async function createHousehold(name) {
     .from("household_members")
     .insert({ household_id: householdId, user_id: user.id, role: "owner" });
 
-  if (memberError) throw memberError;
+  if (memberError) {
+    const claimedHouseholdId = await claimCreatedHousehold().catch(() => null);
+    if (claimedHouseholdId) return { id: claimedHouseholdId, name };
+    throw memberError;
+  }
 
   localStorage.setItem("activeHouseholdId", householdId);
   return { id: householdId, name };
