@@ -24,7 +24,7 @@ begin
 
   if target_household_id is null then
     insert into public.households (name, created_by)
-    values ('Saki & Peki', target_user_id)
+    values ('Moj household', target_user_id)
     returning id into target_household_id;
   end if;
 
