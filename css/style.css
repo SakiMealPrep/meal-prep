@@ -60,7 +60,7 @@ a:hover {
 }
 
 .app-main {
-  padding-top: 88px !important;
+  padding-top: 36px !important;
   max-width: 1080px;
 }
 
@@ -231,6 +231,75 @@ a:hover {
   color: var(--text-muted);
 }
 
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.settings-panel {
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+  color: var(--text);
+}
+
+.settings-panel h2 {
+  font-size: 1.05rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.settings-panel p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.settings-link {
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.settings-link > div {
+  flex: 1;
+}
+
+.settings-icon {
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: #e6f4ea;
+  color: var(--primary);
+}
+
+.settings-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+  font-weight: 700;
+}
+
+.settings-toggle input {
+  width: 48px;
+  height: 26px;
+  accent-color: var(--primary);
+}
+
 .badge-goal,
 .badge-soft {
   font-size: 0.72rem;
@@ -320,104 +389,6 @@ textarea:focus {
   color: #274436 !important;
 }
 
-.hamburger-nav {
-  position: fixed;
-  top: 12px;
-  left: 12px;
-  z-index: 1200;
-}
-
-.hamburger-btn {
-  width: 46px;
-  height: 46px;
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  background: var(--surface-glass);
-  backdrop-filter: blur(14px);
-  border-radius: 14px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 4px;
-  box-shadow: var(--shadow-soft);
-}
-
-.hamburger-btn span {
-  width: 20px;
-  height: 2px;
-  background: var(--primary);
-  border-radius: 2px;
-  transition: all 0.28s ease-in-out;
-}
-
-.hamburger-btn.open span:nth-child(1) {
-  transform: translateY(6px) rotate(45deg);
-}
-
-.hamburger-btn.open span:nth-child(2) {
-  opacity: 0;
-}
-
-.hamburger-btn.open span:nth-child(3) {
-  transform: translateY(-6px) rotate(-45deg);
-}
-
-.hamburger-menu {
-  display: none;
-  position: absolute;
-  top: 56px;
-  left: 0;
-  min-width: 240px;
-  background: var(--surface-glass);
-  backdrop-filter: blur(20px);
-  border-radius: var(--radius-md);
-  border: 1px solid rgba(255, 255, 255, 0.68);
-  box-shadow: var(--shadow-card);
-  padding: 0.5rem;
-}
-
-.hamburger-menu.open {
-  display: block;
-}
-
-.hamburger-menu ul {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.menu-item {
-  width: 100%;
-  text-align: left;
-  background: transparent;
-  border: 0;
-  color: var(--text);
-  font-weight: 500;
-  padding: 0.72rem 0.82rem;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-}
-
-.menu-item:hover,
-.menu-item:focus-visible {
-  background: var(--surface-muted);
-}
-
-.menu-backdrop {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(16, 33, 23, 0.25);
-  backdrop-filter: blur(4px);
-  z-index: 1100;
-}
-
-.menu-backdrop.open {
-  display: block;
-}
-
 .table {
   margin-bottom: 0;
 }
@@ -462,7 +433,7 @@ textarea:focus {
   backdrop-filter: blur(14px);
   border-radius: 18px;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 0.3rem;
   padding: 0.45rem;
   z-index: 1000;
@@ -534,7 +505,6 @@ body.dark-mode .page-eyebrow {
   color: #a8dfb8;
 }
 
-body.dark-mode .menu-item,
 body.dark-mode .mobile-nav a,
 body.dark-mode .footer {
   color: #bfd0c5;
@@ -553,12 +523,12 @@ body.dark-mode .btn-outline-dark {
 
 @media (max-width: 900px) {
   .app-main {
-    padding-top: 82px !important;
+    padding-top: 28px !important;
   }
 }
 
 @media (min-width: 901px) {
   .mobile-nav {
-    grid-template-columns: repeat(8, 1fr);
+    grid-template-columns: repeat(5, 1fr);
   }
 }
