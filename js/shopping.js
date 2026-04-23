@@ -2,6 +2,7 @@ import { getRecipes } from "./supabase.js";
 
 const container = document.getElementById("shoppingListContainer");
 const meta = document.getElementById("shoppingListMeta");
+const finishShoppingButton = document.getElementById("finishShopping");
 const clearBoughtButton = document.getElementById("clearBoughtItems");
 const resetButton = document.getElementById("resetShoppingList");
 
@@ -115,6 +116,24 @@ function clearBoughtItems() {
   showToast("Kupljene stavke su sklonjene.", "success");
 }
 
+function finishShopping() {
+  if (!currentItems.length) {
+    showToast("Lista kupovine je vec prazna.", "info");
+    return;
+  }
+
+  const bought = new Set(getBoughtItems());
+  const remainingItems = currentItems.filter((item) => !bought.has(item.key));
+  const itemsToStore = remainingItems.length ? remainingItems : currentItems;
+  addInventoryItems(itemsToStore.map((item) => item.key));
+
+  currentItems = [];
+  localStorage.removeItem("shoppingList");
+  localStorage.removeItem("shoppingBought");
+  renderList();
+  showToast("Kupovina je zavrsena. Stavke su prebacene u inventar.", "success", 4000);
+}
+
 function resetShoppingList() {
   localStorage.removeItem("shoppingList");
   localStorage.removeItem("shoppingBought");
@@ -150,8 +169,12 @@ function getInventory() {
 }
 
 function addInventoryItem(key) {
+  addInventoryItems([key]);
+}
+
+function addInventoryItems(keys) {
   const inventory = new Set(getInventory());
-  inventory.add(key);
+  keys.forEach((key) => inventory.add(key));
   localStorage.setItem("inventory", JSON.stringify(Array.from(inventory).sort()));
 }
 
@@ -192,6 +215,7 @@ container.addEventListener("change", (event) => {
 });
 
 clearBoughtButton?.addEventListener("click", clearBoughtItems);
+finishShoppingButton?.addEventListener("click", finishShopping);
 resetButton?.addEventListener("click", resetShoppingList);
 
 initShoppingList();
