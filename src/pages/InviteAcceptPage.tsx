@@ -6,10 +6,10 @@ import { acceptInvite, InvitePreview, previewInvite } from "../lib/households";
 import { routes, withRedirect } from "../lib/routes";
 
 const statusCopy: Record<string, string> = {
-  invalid: "This invite link is invalid.",
-  expired: "This invite has expired. Ask for a new invite.",
-  used: "This invite has already been used.",
-  already_member: "You are already a member of this household.",
+  invalid: "Ovaj link za pozivnicu nije vazeci.",
+  expired: "Ova pozivnica je istekla. Zatrazi novu.",
+  used: "Ova pozivnica je vec iskoriscena.",
+  already_member: "Vec si clan ovog domacinstva.",
 };
 
 export function InviteAcceptPage() {
@@ -25,9 +25,9 @@ export function InviteAcceptPage() {
   const redirectHere = `${location.pathname}${location.search}`;
 
   const invalidMessage = useMemo(() => {
-    if (!token) return "This invite link is missing a token.";
+    if (!token) return "Ovom linku za pozivnicu nedostaje token.";
     if (!preview || preview.status === "valid") return "";
-    return statusCopy[preview.status] ?? "This invite cannot be accepted.";
+    return statusCopy[preview.status] ?? "Ova pozivnica ne moze da se prihvati.";
   }, [preview, token]);
 
   useEffect(() => {
@@ -40,7 +40,7 @@ export function InviteAcceptPage() {
       try {
         setPreview(await previewInvite(token));
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Unable to load invite.");
+        setError(err instanceof Error ? err.message : "Ucitavanje pozivnice nije uspelo.");
       } finally {
         setChecking(false);
       }
@@ -61,7 +61,7 @@ export function InviteAcceptPage() {
       await acceptInvite(token);
       window.location.assign(routes.legacyAppHome);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to accept invite.");
+      setError(err instanceof Error ? err.message : "Prihvatanje pozivnice nije uspelo.");
     } finally {
       setSubmitting(false);
     }
@@ -70,9 +70,9 @@ export function InviteAcceptPage() {
   return (
     <main className="centered-page">
       <section className="simple-panel">
-        <h1>Household invite</h1>
+        <h1>Pozivnica za domacinstvo</h1>
         {checking || loading ? (
-          <p>Checking your invite...</p>
+          <p>Proveravam tvoju pozivnicu...</p>
         ) : (
           <>
             {error && <StatusMessage type="error">{error}</StatusMessage>}
@@ -80,14 +80,14 @@ export function InviteAcceptPage() {
             {preview?.status === "valid" && (
               <>
                 <StatusMessage type="info">
-                  You have been invited to join {preview.household_name ?? "this household"}.
+                  Pozvan/a si da se pridruzis domacinstvu {preview.household_name ?? "ovom domacinstvu"}.
                 </StatusMessage>
                 <button onClick={handleAccept} disabled={submitting}>
-                  {submitting ? "Joining..." : "Accept invite"}
+                  {submitting ? "Pridruzujem..." : "Prihvati pozivnicu"}
                 </button>
               </>
             )}
-            {preview?.status === "already_member" && <Link to={routes.household}>Open household</Link>}
+            {preview?.status === "already_member" && <Link to={routes.household}>Otvori domacinstvo</Link>}
           </>
         )}
       </section>

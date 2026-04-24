@@ -31,7 +31,7 @@ export async function listHouseholds() {
   } = await supabase.auth.getUser();
 
   if (userError) throw userError;
-  if (!user) throw new Error("You must be signed in to view households.");
+  if (!user) throw new Error("Moras da budes prijavljen/a da bi video/la domacinstva.");
 
   const { data, error } = await supabase
     .from("household_members")
@@ -67,7 +67,7 @@ export async function createInvite(householdId: string, email: string) {
   } = await supabase.auth.getUser();
 
   if (userError) throw userError;
-  if (!user) throw new Error("You must be signed in to create invites.");
+  if (!user) throw new Error("Moras da budes prijavljen/a da bi pravio/la pozivnice.");
 
   const token = crypto.randomUUID().replaceAll("-", "") + crypto.randomUUID().replaceAll("-", "");
   const tokenHash = await sha256(token);

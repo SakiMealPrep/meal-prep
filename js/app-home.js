@@ -28,6 +28,6 @@ async function initDashboard() {
     subtitle.textContent = `${household.name} • ${user.email}`;
   } catch (error) {
     console.error(error);
-    subtitle.textContent = "Nismo uspeli da ucitamo planner. Proveri household i prijavu.";
+    subtitle.textContent = "Nismo uspeli da ucitamo planner. Proveri domacinstvo i prijavu.";
   }
 }

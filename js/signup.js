@@ -8,7 +8,7 @@ const subtitle = document.getElementById("signupSubtitle");
 
 if (invite) {
   loginLink.href = `login.html?invite=${encodeURIComponent(invite)}`;
-  subtitle.textContent = "Registruj se i automatski se pridruzi household-u iz pozivnice.";
+  subtitle.textContent = "Registruj se i automatski se pridruzi domacinstvu iz pozivnice.";
 }
 
 form.addEventListener("submit", async (event) => {

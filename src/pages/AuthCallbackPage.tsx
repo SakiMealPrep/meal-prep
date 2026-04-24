@@ -9,7 +9,7 @@ export function AuthCallbackPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [error, setError] = useState("");
-  const [message, setMessage] = useState("Hang tight while we finish signing you in.");
+  const [message, setMessage] = useState("Sacekaj trenutak dok zavrsavamo prijavu.");
 
   useEffect(() => {
     async function finishAuth() {
@@ -37,7 +37,7 @@ export function AuthCallbackPage() {
         const destination = await resolveAuthenticatedDestination(
           redirectTo.startsWith("/") ? redirectTo : routes.household,
         );
-        setMessage("Email confirmed. Redirecting you into the app...");
+        setMessage("Email je potvrdjen. Preusmeravam te u aplikaciju...");
         if (destination === routes.legacyAppHome) {
           window.location.assign(destination);
           return;
@@ -80,11 +80,11 @@ export function AuthCallbackPage() {
   return (
     <main className="centered-page">
       <section className="simple-panel">
-        <h1>Confirming your email</h1>
+        <h1>Potvrdjujemo tvoj email</h1>
         {error ? (
           <>
             <StatusMessage type="error">{error}</StatusMessage>
-            <Link to={routes.login}>Back to sign in</Link>
+            <Link to={routes.login}>Nazad na prijavu</Link>
           </>
         ) : (
           <p>{message}</p>

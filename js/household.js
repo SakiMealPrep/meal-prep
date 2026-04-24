@@ -54,7 +54,7 @@ householdForm.addEventListener("submit", async (event) => {
     await migrateLocalDataNotice();
     window.location.href = "index.html";
   } catch (error) {
-    showToast(error.message || "Household nije napravljen.", "danger", 5000);
+    showToast(error.message || "Domacinstvo nije napravljeno.", "danger", 5000);
   }
 });
 
@@ -94,7 +94,7 @@ sendInviteButton.addEventListener("click", async () => {
 function showExistingHousehold(household) {
   currentHousehold = household;
   householdActionTitle.textContent = household.name;
-  householdActionText.textContent = "Vec si vlasnik ovog household-a. Posalji pozivnicu za novog clana.";
+  householdActionText.textContent = "Vec si vlasnik ovog domacinstva. Posalji pozivnicu za novog clana.";
   householdForm.hidden = true;
   existingHouseholdActions.hidden = false;
 }

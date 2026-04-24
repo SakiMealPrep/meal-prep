@@ -20,14 +20,14 @@ export function ForgotPasswordPage() {
       await sendPasswordReset(email);
       navigate(`${routes.checkEmail}?mode=reset&email=${encodeURIComponent(email)}`, { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to send reset email.");
+      setError(err instanceof Error ? err.message : "Slanje emaila za reset nije uspelo.");
     } finally {
       setSubmitting(false);
     }
   }
 
   return (
-    <AuthLayout title="Reset your password" subtitle="We will email you a secure password recovery link.">
+    <AuthLayout title="Resetuj lozinku" subtitle="Poslacemo ti siguran link za oporavak lozinke na email.">
       {error && <StatusMessage type="error">{error}</StatusMessage>}
       <form onSubmit={handleSubmit} className="form-stack">
         <label>
@@ -35,11 +35,11 @@ export function ForgotPasswordPage() {
           <input value={email} onChange={(event) => setEmail(event.target.value)} type="email" required />
         </label>
         <button type="submit" disabled={submitting}>
-          {submitting ? "Sending..." : "Send reset link"}
+          {submitting ? "Saljem..." : "Posalji link za reset"}
         </button>
       </form>
       <div className="auth-links">
-        <Link to={routes.login}>Back to sign in</Link>
+        <Link to={routes.login}>Nazad na prijavu</Link>
       </div>
     </AuthLayout>
   );

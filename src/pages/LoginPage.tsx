@@ -38,7 +38,7 @@ export function LoginPage() {
 
       navigate(destination, { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to sign in.");
+      setError(err instanceof Error ? err.message : "Prijava nije uspela.");
     } finally {
       setSubmitting(false);
     }
@@ -46,7 +46,7 @@ export function LoginPage() {
 
   async function handleResendConfirmation() {
     if (!email) {
-      setError("Enter your email first so we know where to resend the confirmation link.");
+      setError("Prvo unesi email adresu kako bismo znali gde da ponovo posaljemo link za potvrdu.");
       return;
     }
 
@@ -55,16 +55,16 @@ export function LoginPage() {
 
     try {
       await resendConfirmationEmail(email, redirectTo);
-      setMessage(`We sent a fresh confirmation link to ${email}.`);
+      setMessage(`Poslali smo novi link za potvrdu na adresu ${email}.`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to resend confirmation email.");
+      setError(err instanceof Error ? err.message : "Ponovno slanje email potvrde nije uspelo.");
     } finally {
       setResending(false);
     }
   }
 
   return (
-    <AuthLayout title="Welcome back" subtitle="Sign in to manage your household meal planning.">
+    <AuthLayout title="Dobrodosao/la nazad" subtitle="Prijavi se da upravljas planiranjem obroka za svoje domacinstvo.">
       {message && <StatusMessage type="success">{message}</StatusMessage>}
       {error && <StatusMessage type="error">{error}</StatusMessage>}
       <form onSubmit={handleSubmit} className="form-stack">
@@ -73,7 +73,7 @@ export function LoginPage() {
           <input value={email} onChange={(event) => setEmail(event.target.value)} type="email" required />
         </label>
         <label>
-          Password
+          Lozinka
           <input
             value={password}
             onChange={(event) => setPassword(event.target.value)}
@@ -83,15 +83,15 @@ export function LoginPage() {
           />
         </label>
         <button type="submit" disabled={submitting}>
-          {submitting ? "Signing in..." : "Sign in"}
+          {submitting ? "Prijavljujem..." : "Prijavi se"}
         </button>
       </form>
       <div className="auth-links">
-        <Link to={routes.forgotPassword}>Forgot password?</Link>
-        <Link to={`${routes.signup}?redirectTo=${encodeURIComponent(redirectTo)}`}>Create account</Link>
+        <Link to={routes.forgotPassword}>Zaboravljena lozinka?</Link>
+        <Link to={`${routes.signup}?redirectTo=${encodeURIComponent(redirectTo)}`}>Napravi nalog</Link>
         {needsEmailConfirmation && (
           <button type="button" className="secondary-button" onClick={handleResendConfirmation} disabled={resending}>
-            {resending ? "Sending..." : "Resend confirmation email"}
+            {resending ? "Saljem..." : "Posalji ponovo email potvrdu"}
           </button>
         )}
       </div>

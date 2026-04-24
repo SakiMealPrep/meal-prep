@@ -6,7 +6,7 @@ export function ProtectedRoute() {
   const location = useLocation();
   const { isAuthenticated, loading } = useAuth();
 
-  if (loading) return <main className="centered-page">Loading your session...</main>;
+  if (loading) return <main className="centered-page">Ucitavam tvoju sesiju...</main>;
 
   if (!isAuthenticated) {
     const redirectTo = `${location.pathname}${location.search}`;

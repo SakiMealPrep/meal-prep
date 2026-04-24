@@ -25,7 +25,7 @@ window.addEventListener("beforeinstallprompt", (event) => {
 
 installAppButton?.addEventListener("click", async () => {
   if (!installPromptEvent) {
-    showToast("Ako dugme nije dostupno, otvori browser meni i izaberi Add to Home Screen.", "info", 5000);
+    showToast("Ako dugme nije dostupno, otvori meni browsera i izaberi Dodaj na pocetni ekran.", "info", 5000);
     return;
   }
 
@@ -83,7 +83,7 @@ async function initAccountPanel() {
   try {
     const user = await getCurrentUser();
     if (!user) {
-      householdStatus.textContent = "Nisi ulogovan/a. Prijavi se da koristis household funkcije.";
+      householdStatus.textContent = "Nisi ulogovan/a. Prijavi se da koristis funkcije domacinstva.";
       inviteMemberButton.textContent = "Prijavi se";
       accountAction = "login";
       logoutButton.hidden = true;
@@ -92,8 +92,8 @@ async function initAccountPanel() {
 
     const household = await getCurrentHousehold();
     if (!household) {
-      householdStatus.textContent = `Ulogovan/a kao ${user.email}. Jos nemas household.`;
-      inviteMemberButton.textContent = "Napravi household";
+      householdStatus.textContent = `Ulogovan/a kao ${user.email}. Jos nemas domacinstvo.`;
+      inviteMemberButton.textContent = "Napravi domacinstvo";
       accountAction = "create-household";
       return;
     }
@@ -103,7 +103,7 @@ async function initAccountPanel() {
     householdStatus.textContent = `${household.name} • ${memberCount} • ${user.email}`;
     accountAction = "invite";
   } catch (error) {
-    householdStatus.textContent = "Household status nije dostupan. Proveri Supabase schema.";
+    householdStatus.textContent = "Status domacinstva nije dostupan. Proveri Supabase semu.";
     console.error(error);
   }
 }

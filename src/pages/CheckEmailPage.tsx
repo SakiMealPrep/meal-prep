@@ -4,14 +4,14 @@ import { routes } from "../lib/routes";
 
 const copy = {
   signup: {
-    title: "Check your inbox",
-    subtitle: "We sent a confirmation link to finish creating your account.",
-    hint: "Open the email on this device and tap the confirmation button to continue.",
+    title: "Proveri svoje sanduce",
+    subtitle: "Poslali smo ti link za potvrdu kako bi zavrsio/la pravljenje naloga.",
+    hint: "Otvori email na ovom uredjaju i dodirni dugme za potvrdu da bi nastavio/la.",
   },
   reset: {
-    title: "Reset link sent",
-    subtitle: "We emailed you a secure password reset link.",
-    hint: "Open the email and continue on the same browser so we can verify the recovery session.",
+    title: "Link za reset je poslat",
+    subtitle: "Poslali smo ti siguran link za reset lozinke.",
+    hint: "Otvori email i nastavi u istom browseru kako bismo mogli da potvrdimo recovery sesiju.",
   },
 } as const;
 
@@ -24,12 +24,12 @@ export function CheckEmailPage() {
   return (
     <AuthLayout title={currentCopy.title} subtitle={currentCopy.subtitle}>
       <div className="status-message status-info">
-        {email ? <>We sent the link to <strong>{email}</strong>.</> : currentCopy.hint}
+        {email ? <>Poslali smo link na adresu <strong>{email}</strong>.</> : currentCopy.hint}
       </div>
       <p className="muted-copy">{currentCopy.hint}</p>
       <div className="auth-links">
-        <Link to={routes.login}>Back to sign in</Link>
-        {mode === "reset" ? <Link to={routes.forgotPassword}>Send another reset link</Link> : <Link to={routes.signup}>Use another email</Link>}
+        <Link to={routes.login}>Nazad na prijavu</Link>
+        {mode === "reset" ? <Link to={routes.forgotPassword}>Posalji novi reset link</Link> : <Link to={routes.signup}>Upotrebi drugu email adresu</Link>}
       </div>
     </AuthLayout>
   );

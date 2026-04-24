@@ -26,6 +26,13 @@ export function HouseholdPage() {
   const hasHousehold = households.length > 0;
   const canInvite = activeHousehold?.role === "owner" || activeHousehold?.role === "admin";
 
+  function formatRole(role?: Household["role"]) {
+    if (role === "owner") return "vlasnik";
+    if (role === "admin") return "administrator";
+    if (role === "member") return "clan";
+    return "";
+  }
+
   useEffect(() => {
     loadHouseholds();
   }, []);
@@ -39,7 +46,7 @@ export function HouseholdPage() {
       setHouseholds(rows);
       setActiveHouseholdId((current) => current || rows[0]?.id || "");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to load households.");
+      setError(err instanceof Error ? err.message : "Ucitavanje domacinstava nije uspelo.");
     } finally {
       setLoading(false);
     }
@@ -55,10 +62,10 @@ export function HouseholdPage() {
       const householdId = await createHousehold(householdName);
       setHouseholdName("");
       setActiveHouseholdId(householdId);
-      setMessage("Household created.");
+      setMessage("Domacinstvo je napravljeno.");
       await loadHouseholds();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to create household.");
+      setError(err instanceof Error ? err.message : "Pravljenje domacinstva nije uspelo.");
     } finally {
       setSubmittingHousehold(false);
     }
@@ -79,9 +86,9 @@ export function HouseholdPage() {
       link.searchParams.set("token", invite.token);
       setInviteLink(link.toString());
       setInviteEmail("");
-      setMessage(`Invite created. It expires on ${new Date(invite.expiresAt).toLocaleDateString()}.`);
+      setMessage(`Pozivnica je napravljena. Istice ${new Date(invite.expiresAt).toLocaleDateString()}.`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to create invite.");
+      setError(err instanceof Error ? err.message : "Pravljenje pozivnice nije uspelo.");
     } finally {
       setSubmittingInvite(false);
     }
@@ -101,20 +108,20 @@ export function HouseholdPage() {
           <p>{user?.email}</p>
         </div>
         <button className="secondary-button" onClick={handleSignOut}>
-          Sign out
+          Odjavi se
         </button>
       </header>
 
       <section className="page-heading">
-        <h1>Household</h1>
+        <h1>Domacinstvo</h1>
         <p>
           {hasHousehold
-            ? "Manage your household and share invite links with the people who plan meals with you."
-            : "Create a shared household and invite members by email."}
+            ? "Upravljaj svojim domacinstvom i deli pozivnice sa ljudima koji planiraju obroke zajedno sa tobom."
+            : "Napravi zajednicko domacinstvo i pozovi clanove putem emaila."}
         </p>
       </section>
 
-      {loading && <StatusMessage type="info">Loading household data...</StatusMessage>}
+      {loading && <StatusMessage type="info">Ucitavam podatke o domacinstvu...</StatusMessage>}
       {message && <StatusMessage type="success">{message}</StatusMessage>}
       {error && <StatusMessage type="error">{error}</StatusMessage>}
 
@@ -122,33 +129,33 @@ export function HouseholdPage() {
         <article className="panel">
           {hasHousehold ? (
             <>
-              <h2>Your household</h2>
+              <h2>Tvoje domacinstvo</h2>
               <div className="household-summary">
                 <div>
-                  <span className="summary-label">Active household</span>
+                  <span className="summary-label">Aktivno domacinstvo</span>
                   <strong>{activeHousehold?.name}</strong>
                 </div>
                 <div>
-                  <span className="summary-label">Your role</span>
-                  <strong>{activeHousehold?.role}</strong>
+                  <span className="summary-label">Tvoja uloga</span>
+                  <strong>{formatRole(activeHousehold?.role)}</strong>
                 </div>
               </div>
             </>
           ) : (
             <>
-              <h2>Create household</h2>
+              <h2>Napravi domacinstvo</h2>
               <form onSubmit={handleCreateHousehold} className="form-stack">
                 <label>
-                  Household name
+                  Naziv domacinstva
                   <input
                     value={householdName}
                     onChange={(event) => setHouseholdName(event.target.value)}
-                    placeholder="Family kitchen"
+                    placeholder="Porodicna kuhinja"
                     required
                   />
                 </label>
                 <button type="submit" disabled={submittingHousehold}>
-                  {submittingHousehold ? "Creating..." : "Create household"}
+                  {submittingHousehold ? "Pravim..." : "Napravi domacinstvo"}
                 </button>
               </form>
             </>
@@ -156,41 +163,41 @@ export function HouseholdPage() {
         </article>
 
         <article className="panel">
-          <h2>Invite member</h2>
+          <h2>Pozovi clana</h2>
           {hasHousehold && canInvite ? (
             <form onSubmit={handleCreateInvite} className="form-stack">
               <label>
-                Household
+                Domacinstvo
                 <select value={activeHousehold?.id ?? ""} onChange={(event) => setActiveHouseholdId(event.target.value)}>
                   {households.map((household) => (
                     <option key={household.id} value={household.id}>
-                      {household.name} ({household.role})
+                      {household.name} ({formatRole(household.role)})
                     </option>
                   ))}
                 </select>
               </label>
               <label>
-                Invite email
+                Email za poziv
                 <input
                   value={inviteEmail}
                   onChange={(event) => setInviteEmail(event.target.value)}
                   type="email"
-                  placeholder="member@example.com"
+                  placeholder="clan@example.com"
                   required
                 />
               </label>
               <button type="submit" disabled={submittingInvite}>
-                {submittingInvite ? "Creating invite..." : "Create invite link"}
+                {submittingInvite ? "Pravim pozivnicu..." : "Napravi link za pozivnicu"}
               </button>
             </form>
           ) : hasHousehold ? (
-            <p>Only household owners and admins can create invite links.</p>
+            <p>Samo vlasnici i administratori domacinstva mogu da prave pozivnice.</p>
           ) : (
-            <p>Create a household first, then you can invite members.</p>
+            <p>Prvo napravi domacinstvo, pa ces onda moci da pozivas clanove.</p>
           )}
           {inviteLink && (
             <label className="copy-field">
-              Invite link
+              Link za pozivnicu
               <input value={inviteLink} readOnly onFocus={(event) => event.target.select()} />
             </label>
           )}
@@ -198,18 +205,18 @@ export function HouseholdPage() {
       </section>
 
       <section className="panel">
-        <h2>Your households</h2>
+        <h2>Tvoja domacinstva</h2>
         {households.length ? (
           <ul className="household-list">
             {households.map((household) => (
               <li key={household.id}>
                 <strong>{household.name}</strong>
-                <span>{household.role}</span>
+                <span>{formatRole(household.role)}</span>
               </li>
             ))}
           </ul>
         ) : (
-          <p>No households yet.</p>
+          <p>Jos nema domacinstava.</p>
         )}
       </section>
     </main>

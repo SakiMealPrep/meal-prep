@@ -30,14 +30,14 @@ export function SignupPage() {
         { replace: true },
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to create account.");
+      setError(err instanceof Error ? err.message : "Pravljenje naloga nije uspelo.");
     } finally {
       setSubmitting(false);
     }
   }
 
   return (
-    <AuthLayout title="Create your account" subtitle="Confirm your email, then continue into your household.">
+    <AuthLayout title="Napravi svoj nalog" subtitle="Potvrdi email adresu, pa nastavi u svoje domacinstvo.">
       {error && <StatusMessage type="error">{error}</StatusMessage>}
       <form onSubmit={handleSubmit} className="form-stack">
         <label>
@@ -45,7 +45,7 @@ export function SignupPage() {
           <input value={email} onChange={(event) => setEmail(event.target.value)} type="email" required />
         </label>
         <label>
-          Password
+          Lozinka
           <input
             value={password}
             onChange={(event) => setPassword(event.target.value)}
@@ -55,11 +55,11 @@ export function SignupPage() {
           />
         </label>
         <button type="submit" disabled={submitting}>
-          {submitting ? "Creating account..." : "Sign up"}
+          {submitting ? "Pravim nalog..." : "Registruj se"}
         </button>
       </form>
       <div className="auth-links">
-        <Link to={`${routes.login}?redirectTo=${encodeURIComponent(redirectTo)}`}>Already have an account?</Link>
+        <Link to={`${routes.login}?redirectTo=${encodeURIComponent(redirectTo)}`}>Vec imas nalog?</Link>
       </div>
     </AuthLayout>
   );

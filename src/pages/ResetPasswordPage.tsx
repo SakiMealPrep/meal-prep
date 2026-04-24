@@ -55,12 +55,12 @@ export function ResetPasswordPage() {
     setError("");
 
     if (!recoveryReady) {
-      setError("Open the password reset link from your email again to start a secure recovery session.");
+      setError("Otvori ponovo link za reset lozinke iz emaila da bi zapoceo/la bezbednu recovery sesiju.");
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+      setError("Lozinke se ne poklapaju.");
       return;
     }
 
@@ -69,25 +69,25 @@ export function ResetPasswordPage() {
       await updatePassword(password);
       setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to update password.");
+      setError(err instanceof Error ? err.message : "Azuriranje lozinke nije uspelo.");
     } finally {
       setSubmitting(false);
     }
   }
 
   return (
-    <AuthLayout title="Choose a new password" subtitle="Enter a new password for your account.">
-      {checkingRecovery && <StatusMessage type="info">Checking your recovery session...</StatusMessage>}
+    <AuthLayout title="Izaberi novu lozinku" subtitle="Unesi novu lozinku za svoj nalog.">
+      {checkingRecovery && <StatusMessage type="info">Proveravam recovery sesiju...</StatusMessage>}
       {!checkingRecovery && !recoveryReady && !success && (
         <StatusMessage type="info">
-          This page works only from the password reset link in your email.
+          Ova stranica radi samo kada je otvoris iz linka za reset lozinke koji si dobio/la emailom.
         </StatusMessage>
       )}
-      {success && <StatusMessage type="success">Password updated successfully.</StatusMessage>}
+      {success && <StatusMessage type="success">Lozinka je uspesno azurirana.</StatusMessage>}
       {error && <StatusMessage type="error">{error}</StatusMessage>}
       <form onSubmit={handleSubmit} className="form-stack">
         <label>
-          New password
+          Nova lozinka
           <input
             value={password}
             onChange={(event) => setPassword(event.target.value)}
@@ -97,7 +97,7 @@ export function ResetPasswordPage() {
           />
         </label>
         <label>
-          Confirm password
+          Potvrdi lozinku
           <input
             value={confirmPassword}
             onChange={(event) => setConfirmPassword(event.target.value)}
@@ -107,11 +107,11 @@ export function ResetPasswordPage() {
           />
         </label>
         <button type="submit" disabled={submitting || success || checkingRecovery || !recoveryReady}>
-          {submitting ? "Saving..." : "Save password"}
+          {submitting ? "Cuvam..." : "Sacuvaj lozinku"}
         </button>
       </form>
       <div className="auth-links">
-        {success ? <Link to={routes.household}>Continue</Link> : <Link to={routes.forgotPassword}>Request a new reset link</Link>}
+        {success ? <Link to={routes.household}>Nastavi dalje</Link> : <Link to={routes.forgotPassword}>Zatrazi novi link za reset</Link>}
       </div>
     </AuthLayout>
   );

@@ -9,20 +9,20 @@ export function HomePage() {
     <main className="home-page">
       <section className="home-hero">
         <p className="eyebrow">Smart Meal Planner</p>
-        <h1>Plan meals with everyone in your household.</h1>
-        <p>Use Supabase Auth, secure household membership, and invite links that work for new and existing users.</p>
+        <h1>Planiraj obroke zajedno sa svim clanovima svog domacinstva.</h1>
+        <p>Koristi sigurnu prijavu, zajednicko domacinstvo i pozivnice koje rade i za nove i za postojece korisnike.</p>
         <div className="button-row">
           {!loading && isAuthenticated ? (
             <a className="button-link" href={routes.legacyAppHome}>
-              Open planner
+              Otvori planner
             </a>
           ) : (
             <>
               <Link className="button-link" to={routes.login}>
-                Sign in
+                Prijavi se
               </Link>
               <Link className="button-link secondary" to={routes.signup}>
-                Create account
+                Napravi nalog
               </Link>
             </>
           )}
