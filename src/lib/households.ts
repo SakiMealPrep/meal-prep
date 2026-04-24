@@ -1,4 +1,5 @@
 import { getSupabaseClient } from "./supabase";
+import { routes } from "./routes";
 
 export type Household = {
   id: string;
@@ -109,6 +110,13 @@ export async function acceptInvite(token: string) {
 
   if (error) throw error;
   return data as string;
+}
+
+export async function resolveAuthenticatedDestination(redirectTo = routes.household) {
+  if (redirectTo !== routes.household) return redirectTo;
+
+  const households = await listHouseholds().catch(() => []);
+  return households.length ? routes.legacyAppHome : routes.household;
 }
 
 async function sha256(value: string) {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { StatusMessage } from "../components/StatusMessage";
+import { resolveAuthenticatedDestination } from "../lib/households";
 import { routes } from "../lib/routes";
 import { getSupabaseClient } from "../lib/supabase";
 
@@ -33,8 +34,16 @@ export function AuthCallbackPage() {
           return;
         }
 
+        const destination = await resolveAuthenticatedDestination(
+          redirectTo.startsWith("/") ? redirectTo : routes.household,
+        );
         setMessage("Email confirmed. Redirecting you into the app...");
-        navigate(redirectTo.startsWith("/") ? redirectTo : routes.household, { replace: true });
+        if (destination === routes.legacyAppHome) {
+          window.location.assign(destination);
+          return;
+        }
+
+        navigate(destination, { replace: true });
         return;
       }
 
@@ -54,7 +63,15 @@ export function AuthCallbackPage() {
         return;
       }
 
-      navigate(redirectTo.startsWith("/") ? redirectTo : routes.household, { replace: true });
+      const destination = await resolveAuthenticatedDestination(
+        redirectTo.startsWith("/") ? redirectTo : routes.household,
+      );
+      if (destination === routes.legacyAppHome) {
+        window.location.assign(destination);
+        return;
+      }
+
+      navigate(destination, { replace: true });
     }
 
     finishAuth();

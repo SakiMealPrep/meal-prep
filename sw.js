@@ -1,7 +1,8 @@
-const CACHE_NAME = "smart-meal-planner-v3.13";
+const CACHE_NAME = "smart-meal-planner-v4.0";
 const APP_SHELL = [
   "/",
   "/index.html",
+  "/app.html",
   "/recipes.html",
   "/meal-plan.html",
   "/shopping-list.html",
@@ -15,6 +16,7 @@ const APP_SHELL = [
   "/inventory.html",
   "/css/style.css",
   "/js/main.js",
+  "/js/app-home.js",
   "/js/theme.js",
   "/js/settings.js",
   "/js/pwa.js",
@@ -67,7 +69,7 @@ self.addEventListener("fetch", (event) => {
       .catch(() =>
         caches.match(event.request).then((cached) => {
           if (cached) return cached;
-          if (event.request.mode === "navigate") return caches.match("/index.html");
+          if (event.request.mode === "navigate") return caches.match("/app.html") || caches.match("/index.html");
           return Response.error();
         })
       )

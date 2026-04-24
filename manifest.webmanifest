@@ -2,7 +2,7 @@
   "name": "Smart Meal Planner",
   "short_name": "Meal Planner",
   "description": "Planiranje obroka, inventar frizidera i pametna lista kupovine.",
-  "start_url": "/index.html",
+  "start_url": "/app.html",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",

@@ -59,7 +59,7 @@ export function InviteAcceptPage() {
 
     try {
       await acceptInvite(token);
-      navigate(routes.household, { replace: true });
+      window.location.assign(routes.legacyAppHome);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to accept invite.");
     } finally {

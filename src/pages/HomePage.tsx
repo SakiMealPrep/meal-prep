@@ -13,9 +13,9 @@ export function HomePage() {
         <p>Use Supabase Auth, secure household membership, and invite links that work for new and existing users.</p>
         <div className="button-row">
           {!loading && isAuthenticated ? (
-            <Link className="button-link" to={routes.household}>
-              Open household
-            </Link>
+            <a className="button-link" href={routes.legacyAppHome}>
+              Open planner
+            </a>
           ) : (
             <>
               <Link className="button-link" to={routes.login}>

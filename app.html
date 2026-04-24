@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pocetna • Smart Meal Planner</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/icon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/icon-180.png" />
+  <meta name="theme-color" content="#056135" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Meal Planner" />
+</head>
+<body>
+  <main class="app-main container py-4">
+    <header class="page-header dashboard-header">
+      <div>
+        <span class="page-eyebrow">Planner Home</span>
+        <h1 class="page-title">Tvoj planner</h1>
+        <p id="dashboardSubtitle" class="page-subtitle">Ucitavam household i planner...</p>
+      </div>
+      <div class="dashboard-actions">
+        <a class="btn btn-outline-secondary" href="settings.html">Podesavanja</a>
+        <button id="dashboardLogout" class="btn btn-success" type="button">Odjavi se</button>
+      </div>
+    </header>
+
+    <section class="dashboard-grid mb-4">
+      <a class="dashboard-card" href="recipes.html">
+        <span class="material-icons dashboard-icon">restaurant_menu</span>
+        <div>
+          <h2>Pregled recepata</h2>
+          <p>Pregledaj recepte, filtriraj ih i proveri sta ti fali od sastojaka.</p>
+        </div>
+      </a>
+
+      <a class="dashboard-card" href="meal-plan.html">
+        <span class="material-icons dashboard-icon">calendar_month</span>
+        <div>
+          <h2>Plan obroka</h2>
+          <p>Slozi nedelju, povezi recepte i napravi kupovinu iz plana.</p>
+        </div>
+      </a>
+
+      <a class="dashboard-card" href="shopping-list.html">
+        <span class="material-icons dashboard-icon">shopping_cart</span>
+        <div>
+          <h2>Lista za kupovinu</h2>
+          <p>Vidi sta treba kupiti i prebaci kupljene stvari u inventar.</p>
+        </div>
+      </a>
+
+      <a class="dashboard-card" href="inventory.html">
+        <span class="material-icons dashboard-icon">kitchen</span>
+        <div>
+          <h2>Stanje u frizideru</h2>
+          <p>Oznaci sta vec imas kod kuce da shopping lista bude pametna.</p>
+        </div>
+      </a>
+
+      <a class="dashboard-card" href="household.html">
+        <span class="material-icons dashboard-icon">group</span>
+        <div>
+          <h2>Household</h2>
+          <p>Upravljaj clanovima, aktivnim household-om i pozivnicama.</p>
+        </div>
+      </a>
+
+      <a class="dashboard-card" href="settings.html">
+        <span class="material-icons dashboard-icon">settings</span>
+        <div>
+          <h2>Podesavanja</h2>
+          <p>Dark mode, PWA instalacija, recepti i ostali alati aplikacije.</p>
+        </div>
+      </a>
+    </section>
+  </main>
+
+  <footer class="footer">Saki &amp; Peki • Smart Meal Planner</footer>
+
+  <nav class="mobile-nav" aria-label="Glavna navigacija">
+    <a href="app.html" class="active"><span class="material-icons">home</span>Pocetna</a>
+    <a href="recipes.html"><span class="material-icons">restaurant_menu</span>Recepti</a>
+    <a href="meal-plan.html"><span class="material-icons">calendar_month</span>Plan</a>
+    <a href="shopping-list.html"><span class="material-icons">shopping_cart</span>Kupovina</a>
+    <a href="settings.html"><span class="material-icons">settings</span>Podesavanja</a>
+  </nav>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script type="module" src="js/main.js"></script>
+  <script type="module" src="js/theme.js"></script>
+  <script type="module" src="js/app-home.js"></script>
+  <script type="module" src="js/pwa.js"></script>
+</body>
+</html>

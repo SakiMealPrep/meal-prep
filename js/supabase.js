@@ -114,9 +114,13 @@ export async function getHouseholds() {
 }
 
 async function getMemberHouseholds() {
+  const user = await getCurrentUser();
+  if (!user) return [];
+
   const { data, error } = await supabase
     .from("household_members")
-    .select("role, households(id, name, created_at)")
+    .select("household_id, role, households!inner(id, name, created_at)")
+    .eq("user_id", user.id)
     .order("created_at", { ascending: true });
 
   if (error) throw error;
@@ -165,7 +169,7 @@ export async function repairMyHouseholds() {
 export async function requireSession() {
   const user = await getCurrentUser();
   if (!user) {
-    window.location.href = `login.html?next=${encodeURIComponent(window.location.pathname.split("/").pop() || "index.html")}`;
+    window.location.href = `login.html?next=${encodeURIComponent(window.location.pathname.split("/").pop() || "app.html")}`;
     return null;
   }
   return user;

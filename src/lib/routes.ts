@@ -8,6 +8,7 @@ export const routes = {
   authCallback: "/auth/callback",
   acceptInvite: "/invite/accept",
   household: "/household",
+  legacyAppHome: "/app.html",
 };
 
 export function absoluteUrl(path: string) {

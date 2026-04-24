@@ -1,7 +1,7 @@
 import { getCurrentHousehold, signIn } from "./supabase.js";
 
 const params = new URLSearchParams(window.location.search);
-const next = params.get("next") || "index.html";
+const next = params.get("next") || "app.html";
 const invite = params.get("invite");
 const form = document.getElementById("loginForm");
 const signupLink = document.getElementById("signupLink");

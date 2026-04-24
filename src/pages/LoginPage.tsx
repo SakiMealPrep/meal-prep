@@ -3,6 +3,7 @@ import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { AuthLayout } from "../components/AuthLayout";
 import { StatusMessage } from "../components/StatusMessage";
 import { useAuth } from "../contexts/AuthContext";
+import { resolveAuthenticatedDestination } from "../lib/households";
 import { resendConfirmationEmail, signInWithEmail } from "../lib/auth";
 import { getRedirectTo, routes } from "../lib/routes";
 
@@ -29,7 +30,13 @@ export function LoginPage() {
 
     try {
       await signInWithEmail(email, password);
-      navigate(redirectTo, { replace: true });
+      const destination = await resolveAuthenticatedDestination(redirectTo);
+      if (destination === routes.legacyAppHome) {
+        window.location.assign(destination);
+        return;
+      }
+
+      navigate(destination, { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to sign in.");
     } finally {
