@@ -196,6 +196,19 @@ p {
   margin-top: 1rem;
 }
 
+.household-summary {
+  display: grid;
+  gap: 1rem;
+}
+
+.summary-label {
+  color: #66736a;
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
 .household-list {
   display: grid;
   gap: 0.75rem;

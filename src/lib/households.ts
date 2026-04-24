@@ -24,9 +24,18 @@ export type InvitePreview = {
 
 export async function listHouseholds() {
   const supabase = getSupabaseClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError) throw userError;
+  if (!user) throw new Error("You must be signed in to view households.");
+
   const { data, error } = await supabase
     .from("household_members")
-    .select("role, households(id, name, created_at)")
+    .select("household_id, role, households!inner(id, name, created_at)")
+    .eq("user_id", user.id)
     .order("created_at", { ascending: true });
 
   if (error) throw error;

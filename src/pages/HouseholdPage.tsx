@@ -23,6 +23,8 @@ export function HouseholdPage() {
     () => households.find((household) => household.id === activeHouseholdId) ?? households[0] ?? null,
     [activeHouseholdId, households],
   );
+  const hasHousehold = households.length > 0;
+  const canInvite = activeHousehold?.role === "owner" || activeHousehold?.role === "admin";
 
   useEffect(() => {
     loadHouseholds();
@@ -105,7 +107,11 @@ export function HouseholdPage() {
 
       <section className="page-heading">
         <h1>Household</h1>
-        <p>Create a shared household and invite members by email.</p>
+        <p>
+          {hasHousehold
+            ? "Manage your household and share invite links with the people who plan meals with you."
+            : "Create a shared household and invite members by email."}
+        </p>
       </section>
 
       {loading && <StatusMessage type="info">Loading household data...</StatusMessage>}
@@ -114,26 +120,44 @@ export function HouseholdPage() {
 
       <section className="grid-two">
         <article className="panel">
-          <h2>Create household</h2>
-          <form onSubmit={handleCreateHousehold} className="form-stack">
-            <label>
-              Household name
-              <input
-                value={householdName}
-                onChange={(event) => setHouseholdName(event.target.value)}
-                placeholder="Family kitchen"
-                required
-              />
-            </label>
-            <button type="submit" disabled={submittingHousehold}>
-              {submittingHousehold ? "Creating..." : "Create household"}
-            </button>
-          </form>
+          {hasHousehold ? (
+            <>
+              <h2>Your household</h2>
+              <div className="household-summary">
+                <div>
+                  <span className="summary-label">Active household</span>
+                  <strong>{activeHousehold?.name}</strong>
+                </div>
+                <div>
+                  <span className="summary-label">Your role</span>
+                  <strong>{activeHousehold?.role}</strong>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <h2>Create household</h2>
+              <form onSubmit={handleCreateHousehold} className="form-stack">
+                <label>
+                  Household name
+                  <input
+                    value={householdName}
+                    onChange={(event) => setHouseholdName(event.target.value)}
+                    placeholder="Family kitchen"
+                    required
+                  />
+                </label>
+                <button type="submit" disabled={submittingHousehold}>
+                  {submittingHousehold ? "Creating..." : "Create household"}
+                </button>
+              </form>
+            </>
+          )}
         </article>
 
         <article className="panel">
           <h2>Invite member</h2>
-          {households.length > 0 ? (
+          {hasHousehold && canInvite ? (
             <form onSubmit={handleCreateInvite} className="form-stack">
               <label>
                 Household
@@ -159,6 +183,8 @@ export function HouseholdPage() {
                 {submittingInvite ? "Creating invite..." : "Create invite link"}
               </button>
             </form>
+          ) : hasHousehold ? (
+            <p>Only household owners and admins can create invite links.</p>
           ) : (
             <p>Create a household first, then you can invite members.</p>
           )}
