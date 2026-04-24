@@ -1,88 +1,5 @@
 create extension if not exists pgcrypto;
 
-create or replace function public.set_updated_at()
-returns trigger
-language plpgsql
-set search_path = public
-as $$
-begin
-  new.updated_at = now();
-  return new;
-end;
-$$;
-
-create table if not exists public.recipes (
-  id uuid primary key default gen_random_uuid(),
-  name text not null,
-  meal text not null check (meal in ('dorucak', 'rucak', 'vecera')),
-  goal text not null check (goal in ('gubitak', 'odrzavanje')),
-  description text not null default '',
-  ingredients text[] not null default '{}',
-  calories integer,
-  protein integer,
-  carbs integer,
-  fat integer,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now(),
-  household_id uuid,
-  created_by uuid references auth.users(id) on delete set null
-);
-
-create table if not exists public.households (
-  id uuid primary key default gen_random_uuid(),
-  name text not null check (char_length(trim(name)) between 1 and 120),
-  created_by uuid not null references auth.users(id) on delete cascade,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
-
-create table if not exists public.household_members (
-  household_id uuid not null references public.households(id) on delete cascade,
-  user_id uuid not null references auth.users(id) on delete cascade,
-  role text not null default 'member' check (role in ('owner', 'admin', 'member')),
-  created_at timestamptz not null default now(),
-  primary key (household_id, user_id)
-);
-
-create table if not exists public.household_invites (
-  id uuid primary key default gen_random_uuid(),
-  household_id uuid not null references public.households(id) on delete cascade,
-  token text not null unique,
-  email text,
-  token_hash text,
-  created_by uuid not null references auth.users(id) on delete cascade,
-  expires_at timestamptz not null default (now() + interval '14 days'),
-  used_by uuid references auth.users(id) on delete set null,
-  used_at timestamptz,
-  created_at timestamptz not null default now()
-);
-
-create table if not exists public.household_inventory (
-  household_id uuid not null references public.households(id) on delete cascade,
-  ingredient_key text not null,
-  label text not null,
-  updated_by uuid references auth.users(id) on delete set null,
-  updated_at timestamptz not null default now(),
-  primary key (household_id, ingredient_key)
-);
-
-create table if not exists public.meal_plan_items (
-  household_id uuid not null references public.households(id) on delete cascade,
-  day text not null,
-  meal text not null,
-  recipe_id uuid references public.recipes(id) on delete set null,
-  updated_by uuid references auth.users(id) on delete set null,
-  updated_at timestamptz not null default now(),
-  primary key (household_id, day, meal)
-);
-
-alter table public.recipes
-  drop constraint if exists recipes_household_id_fkey;
-
-alter table public.recipes
-  add constraint recipes_household_id_fkey
-  foreign key (household_id) references public.households(id) on delete cascade;
-
 alter table public.household_invites
   add column if not exists email text,
   add column if not exists token_hash text;
@@ -107,32 +24,15 @@ create index if not exists meal_plan_items_updated_by_idx on public.meal_plan_it
 create index if not exists recipes_household_id_idx on public.recipes (household_id);
 create index if not exists recipes_created_by_idx on public.recipes (created_by);
 
-create or replace function public.is_household_member(target_household_id uuid)
-returns boolean
-language sql
-security definer
+create or replace function public.set_updated_at()
+returns trigger
+language plpgsql
 set search_path = public
 as $$
-  select exists (
-    select 1
-    from public.household_members hm
-    where hm.household_id = target_household_id
-      and hm.user_id = auth.uid()
-  );
-$$;
-
-create or replace function public.is_household_creator(target_household_id uuid)
-returns boolean
-language sql
-security definer
-set search_path = public
-as $$
-  select exists (
-    select 1
-    from public.households h
-    where h.id = target_household_id
-      and h.created_by = auth.uid()
-  );
+begin
+  new.updated_at = now();
+  return new;
+end;
 $$;
 
 create or replace function public.create_household_with_owner(household_name text)
@@ -192,25 +92,21 @@ begin
   end if;
 
   if target_invite.used_at is not null then
-    return query
-      select 'used'::text, target_invite.household_id, target_invite.target_household_name, target_invite.email, target_invite.expires_at;
+    return query select 'used'::text, target_invite.household_id, target_invite.target_household_name, target_invite.email, target_invite.expires_at;
     return;
   end if;
 
   if target_invite.expires_at <= now() then
-    return query
-      select 'expired'::text, target_invite.household_id, target_invite.target_household_name, target_invite.email, target_invite.expires_at;
+    return query select 'expired'::text, target_invite.household_id, target_invite.target_household_name, target_invite.email, target_invite.expires_at;
     return;
   end if;
 
   if auth.uid() is not null and public.is_household_member(target_invite.household_id) then
-    return query
-      select 'already_member'::text, target_invite.household_id, target_invite.target_household_name, target_invite.email, target_invite.expires_at;
+    return query select 'already_member'::text, target_invite.household_id, target_invite.target_household_name, target_invite.email, target_invite.expires_at;
     return;
   end if;
 
-  return query
-    select 'valid'::text, target_invite.household_id, target_invite.target_household_name, target_invite.email, target_invite.expires_at;
+  return query select 'valid'::text, target_invite.household_id, target_invite.target_household_name, target_invite.email, target_invite.expires_at;
 end;
 $$;
 
@@ -337,107 +233,9 @@ begin
 end;
 $$;
 
-drop trigger if exists set_recipes_updated_at on public.recipes;
-create trigger set_recipes_updated_at
-before update on public.recipes
-for each row
-execute function public.set_updated_at();
-
-drop trigger if exists set_households_updated_at on public.households;
-create trigger set_households_updated_at
-before update on public.households
-for each row
-execute function public.set_updated_at();
-
-alter table public.households enable row level security;
-alter table public.household_members enable row level security;
-alter table public.household_invites enable row level security;
 alter table public.household_inventory enable row level security;
 alter table public.meal_plan_items enable row level security;
 alter table public.recipes enable row level security;
-
-drop policy if exists "Members can read households" on public.households;
-create policy "Members can read households"
-on public.households
-for select
-to authenticated
-using (public.is_household_member(id) or created_by = (select auth.uid()));
-
-drop policy if exists "Users can create households" on public.households;
-create policy "Users can create households"
-on public.households
-for insert
-to authenticated
-with check ((select auth.uid()) is not null and created_by = (select auth.uid()));
-
-drop policy if exists "Members can update households" on public.households;
-create policy "Members can update households"
-on public.households
-for update
-to authenticated
-using (public.is_household_member(id))
-with check (public.is_household_member(id));
-
-drop policy if exists "Members can read membership" on public.household_members;
-drop policy if exists "Members can read household memberships" on public.household_members;
-create policy "Members can read membership"
-on public.household_members
-for select
-to authenticated
-using (public.is_household_member(household_id) or user_id = (select auth.uid()));
-
-drop policy if exists "Users can create own owner membership" on public.household_members;
-create policy "Users can create own owner membership"
-on public.household_members
-for insert
-to authenticated
-with check (
-  user_id = (select auth.uid())
-  and role = 'owner'
-  and public.is_household_creator(household_id)
-);
-
-drop policy if exists "Members can leave household" on public.household_members;
-create policy "Members can leave household"
-on public.household_members
-for delete
-to authenticated
-using (user_id = (select auth.uid()));
-
-drop policy if exists "Managers can create invites" on public.household_invites;
-drop policy if exists "Members can create invites" on public.household_invites;
-create policy "Members can create invites"
-on public.household_invites
-for insert
-to authenticated
-with check (
-  created_by = (select auth.uid())
-  and (public.is_household_member(household_id) or public.is_household_creator(household_id))
-);
-
-drop policy if exists "Managers can read household invites" on public.household_invites;
-drop policy if exists "Members can read invites" on public.household_invites;
-create policy "Members can read invites"
-on public.household_invites
-for select
-to authenticated
-using (public.is_household_member(household_id));
-
-drop policy if exists "Invite token can be read by authenticated users" on public.household_invites;
-create policy "Invite token can be read by authenticated users"
-on public.household_invites
-for select
-to authenticated
-using (used_at is null and expires_at > now());
-
-drop policy if exists "Managers can revoke unused invites" on public.household_invites;
-drop policy if exists "Invite creators can mark invites used" on public.household_invites;
-create policy "Invite creators can mark invites used"
-on public.household_invites
-for update
-to authenticated
-using (public.is_household_member(household_id))
-with check (public.is_household_member(household_id));
 
 drop policy if exists "Members can read inventory" on public.household_inventory;
 create policy "Members can read inventory"
@@ -544,8 +342,6 @@ using (
   or public.is_household_member(household_id)
 );
 
-grant execute on function public.is_household_member(uuid) to authenticated;
-grant execute on function public.is_household_creator(uuid) to authenticated;
 grant execute on function public.create_household_with_owner(text) to authenticated;
 grant execute on function public.get_household_invite(text) to anon, authenticated;
 grant execute on function public.accept_household_invite(text) to authenticated;

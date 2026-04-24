@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { StatusMessage } from "../components/StatusMessage";
 import { routes } from "../lib/routes";
-import { supabase } from "../lib/supabase";
+import { getSupabaseClient } from "../lib/supabase";
 
 export function AuthCallbackPage() {
   const navigate = useNavigate();
@@ -12,6 +12,7 @@ export function AuthCallbackPage() {
 
   useEffect(() => {
     async function finishAuth() {
+      const supabase = getSupabaseClient();
       const redirectTo = searchParams.get("redirectTo") ?? routes.household;
       const code = searchParams.get("code");
       const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));

@@ -5,7 +5,7 @@ import { StatusMessage } from "../components/StatusMessage";
 import { useAuth } from "../contexts/AuthContext";
 import { updatePassword } from "../lib/auth";
 import { routes } from "../lib/routes";
-import { supabase } from "../lib/supabase";
+import { getSupabaseClient } from "../lib/supabase";
 
 export function ResetPasswordPage() {
   const { session, loading } = useAuth();
@@ -19,6 +19,7 @@ export function ResetPasswordPage() {
 
   useEffect(() => {
     async function checkRecoverySession() {
+      const supabase = getSupabaseClient();
       const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
       const hashType = hash.get("type");
       const accessToken = hash.get("access_token");

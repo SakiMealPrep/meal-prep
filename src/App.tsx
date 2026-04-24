@@ -3,6 +3,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AuthProvider } from "./contexts/AuthContext";
 import { AuthCallbackPage } from "./pages/AuthCallbackPage";
 import { CheckEmailPage } from "./pages/CheckEmailPage";
+import { ConfigurationErrorPage } from "./pages/ConfigurationErrorPage";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
 import { HomePage } from "./pages/HomePage";
 import { HouseholdPage } from "./pages/HouseholdPage";
@@ -11,8 +12,13 @@ import { LoginPage } from "./pages/LoginPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import { SignupPage } from "./pages/SignupPage";
 import { routes } from "./lib/routes";
+import { hasSupabaseConfig, supabaseConfigError } from "./lib/supabase";
 
 export function App() {
+  if (!hasSupabaseConfig) {
+    return <ConfigurationErrorPage error={supabaseConfigError} />;
+  }
+
   return (
     <BrowserRouter>
       <AuthProvider>

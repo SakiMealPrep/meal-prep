@@ -1,4 +1,4 @@
-import { supabase } from "./supabase";
+import { getSupabaseClient } from "./supabase";
 
 export type Household = {
   id: string;
@@ -23,6 +23,7 @@ export type InvitePreview = {
 };
 
 export async function listHouseholds() {
+  const supabase = getSupabaseClient();
   const { data, error } = await supabase
     .from("household_members")
     .select("role, households(id, name, created_at)")
@@ -39,6 +40,7 @@ export async function listHouseholds() {
 }
 
 export async function createHousehold(name: string) {
+  const supabase = getSupabaseClient();
   const { data, error } = await supabase.rpc("create_household_with_owner", {
     household_name: name,
   });
@@ -48,6 +50,7 @@ export async function createHousehold(name: string) {
 }
 
 export async function createInvite(householdId: string, email: string) {
+  const supabase = getSupabaseClient();
   const {
     data: { user },
     error: userError,
@@ -63,6 +66,7 @@ export async function createInvite(householdId: string, email: string) {
     .from("household_invites")
     .insert({
       household_id: householdId,
+      token,
       email: email.trim().toLowerCase(),
       token_hash: tokenHash,
       created_by: user.id,
@@ -79,6 +83,7 @@ export async function createInvite(householdId: string, email: string) {
 }
 
 export async function previewInvite(token: string) {
+  const supabase = getSupabaseClient();
   const { data, error } = await supabase.rpc("get_household_invite", {
     invite_token: token,
   });
@@ -88,6 +93,7 @@ export async function previewInvite(token: string) {
 }
 
 export async function acceptInvite(token: string) {
+  const supabase = getSupabaseClient();
   const { data, error } = await supabase.rpc("accept_household_invite", {
     invite_token: token,
   });
